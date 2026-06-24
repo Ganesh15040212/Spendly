@@ -3,7 +3,7 @@ import { StorageService } from './storage';
 import { Transaction, Budget, Goal, Subscription } from '../database/schema';
 
 // Define your production Render backend API URL here
-const PROD_API_URL = 'https://YOUR_RENDER_BACKEND_URL.onrender.com/api';
+const PROD_API_URL = 'https://spendly-632z.onrender.com/api';
 
 // Automatically detect host IP based on emulator platform
 const API_URL = !__DEV__
