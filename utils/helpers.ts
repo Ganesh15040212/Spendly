@@ -77,6 +77,10 @@ export const INCOME_CATEGORIES: Record<string, CategoryConfig> = {
   Bonus: { name: 'Bonus', icon: 'gift-outline', color: '#3b82f6' }, // Blue
   Business: { name: 'Business', icon: 'briefcase-outline', color: '#f59e0b' }, // Amber
   PeerShare: { name: 'Peer Transfer', icon: 'people-outline', color: '#8b5cf6' }, // Violet
+  Freelance: { name: 'Freelance', icon: 'laptop-outline', color: '#06b6d4' }, // Cyan
+  Investments: { name: 'Investments', icon: 'trending-up-outline', color: '#10b981' }, // Emerald
+  RentIncome: { name: 'Rental Income', icon: 'home-outline', color: '#a855f7' }, // Purple
+  Refund: { name: 'Refunds/Cashback', icon: 'arrow-undo-outline', color: '#14b8a6' }, // Teal
   Other: { name: 'Other', icon: 'cash-outline', color: '#64748b' }, // Slate
 };
 
@@ -87,6 +91,14 @@ export const EXPENSE_CATEGORIES: Record<string, CategoryConfig> = {
   Medical: { name: 'Medical', icon: 'medical-outline', color: '#ef4444' }, // Red
   Entertainment: { name: 'Entertainment', icon: 'play-circle-outline', color: '#8b5cf6' }, // Violet
   Bills: { name: 'Bills', icon: 'receipt-outline', color: '#3b82f6' }, // Blue
+  Groceries: { name: 'Groceries', icon: 'basket-outline', color: '#10b981' }, // Emerald
+  Fuel: { name: 'Fuel', icon: 'speedometer-outline', color: '#f59e0b' }, // Amber
+  Education: { name: 'Education', icon: 'book-outline', color: '#6366f1' }, // Indigo
+  Subscriptions: { name: 'Subscriptions', icon: 'repeat-outline', color: '#ff007f' }, // Rose Pink
+  RentEMI: { name: 'Rent & Loans', icon: 'home-outline', color: '#f43f5e' }, // Rose Red
+  Insurance: { name: 'Insurance', icon: 'shield-checkmark-outline', color: '#0ea5e9' }, // Sky Blue
+  GiftsCharity: { name: 'Gifts & Charity', icon: 'heart-outline', color: '#ec4899' }, // Pink
+  Taxes: { name: 'Taxes', icon: 'calculator-outline', color: '#dc2626' }, // Dark Red
   Other: { name: 'Other', icon: 'options-outline', color: '#64748b' }, // Slate
 };
 
