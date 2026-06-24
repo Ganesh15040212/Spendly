@@ -1,24 +1,83 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import React, { useEffect } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { useTheme, ThemeProvider } from '../utils/theme';
+import { StorageService } from '../services/storage';
+import { setCachedCurrency } from '../utils/helpers';
+import { LogBox } from 'react-native';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+LogBox.ignoreLogs([
+  'expo-notifications: Android Push notifications',
+  'expo-notifications functionality is not fully supported in Expo Go',
+]);
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+// Secure Routing Guard Controller
+function NavigationGuard() {
+  const segments = useSegments();
+  const router = useRouter();
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  useEffect(() => {
+    const checkAuthenticationState = async () => {
+      const token = await StorageService.getAuthToken();
+      
+      // Determine if active route is in the Auth flow
+      const activeSegment = segments[0] as string;
+      const isAuthScreen = activeSegment === 'login' || activeSegment === 'register' || activeSegment === 'index' || !activeSegment;
+
+      if (!token && !isAuthScreen) {
+        // Force redirect to login if unauthenticated
+        router.replace('/login' as any);
+      } else if (token && (activeSegment === 'login' || activeSegment === 'register')) {
+        // Prevent access to Auth forms if already logged in
+        router.replace('/(tabs)' as any);
+      }
+    };
+
+    checkAuthenticationState();
+  }, [segments]);
+
+  return null;
+}
+
+function RootLayoutContent() {
+  const { colors } = useTheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+    <>
+      <NavigationGuard />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
+        {/* Index (Splash Screen) */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+
+        {/* Auth Stack */}
+        <Stack.Screen name="login" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="register" options={{ headerShown: false, gestureEnabled: false }} />
+
+        {/* Bottom Tab Group */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, gestureEnabled: false }} />
+
+        {/* Add Transaction Modal */}
+        <Stack.Screen
+          name="add-transaction"
+          options={{
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
+            headerShown: false,
+          }}
+        />
       </Stack>
-      <StatusBar style="auto" />
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootLayoutContent />
     </ThemeProvider>
   );
 }
