@@ -321,7 +321,7 @@ export const ProfileScreen: React.FC = () => {
       </ScrollView>
 
       {/* Avatar Picker Modal */}
-      <Modal visible={showAvatarModal} transparent animationType="slide" onRequestClose={() => setShowAvatarModal(false)}>
+      <Modal visible={showAvatarModal} transparent animationType="slide" onRequestClose={() => setShowAvatarModal(false)} statusBarTranslucent={true}>
         <View style={styles.overlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
             <View style={styles.modalHeader}>

@@ -11,6 +11,9 @@ import {
   StatusBar,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -428,156 +431,177 @@ export const BudgetGoalsScreen: React.FC = () => {
       </ScrollView>
 
       {/* ==================== BUDGET MODAL ==================== */}
-      <Modal visible={showBudgetModal} transparent animationType="slide" onRequestClose={() => setShowBudgetModal(false)}>
-        <View style={styles.overlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.setBudget}</Text>
-              <TouchableOpacity onPress={() => setShowBudgetModal(false)}>
-                <Ionicons name="close-circle" size={24} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalBody}>
-              {/* Category selector */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.selectCategory}</Text>
-              <View style={styles.categoryPicker}>
-                {Object.keys(EXPENSE_CATEGORIES).map(cat => (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[
-                      styles.catBtn,
-                      { backgroundColor: colors.background, borderColor: colors.border },
-                      budgetCategory === cat && { borderColor: colors.primary, borderWidth: 1.5 },
-                    ]}
-                    onPress={() => setBudgetCategory(cat)}
-                  >
-                    <Text style={{ color: colors.text, fontSize: 12 }}>{translateCategory(cat, language)}</Text>
+      <Modal visible={showBudgetModal} transparent animationType="slide" onRequestClose={() => setShowBudgetModal(false)} statusBarTranslucent={true}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.overlay}>
+              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.setBudget}</Text>
+                  <TouchableOpacity onPress={() => setShowBudgetModal(false)}>
+                    <Ionicons name="close-circle" size={24} color={colors.textSecondary} />
                   </TouchableOpacity>
-                ))}
-              </View>
+                </View>
 
-              {/* Amount input */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: spacing.md }]}>{t.budgetLimit} ({currency})</Text>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background }]}>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g. 5000"
-                  keyboardType="numeric"
-                  value={budgetLimit}
-                  onChangeText={setBudgetLimit}
-                />
-              </View>
+                <View style={styles.modalBody}>
+                  {/* Category selector */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.selectCategory}</Text>
+                  <View style={styles.categoryPicker}>
+                    {Object.keys(EXPENSE_CATEGORIES).map(cat => (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[
+                          styles.catBtn,
+                          { backgroundColor: colors.background, borderColor: colors.border },
+                          budgetCategory === cat && { borderColor: colors.primary, borderWidth: 1.5 },
+                        ]}
+                        onPress={() => setBudgetCategory(cat)}
+                      >
+                        <Text style={{ color: colors.text, fontSize: 12 }}>{translateCategory(cat, language)}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
 
-              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveBudget}>
-                <Text style={styles.saveBtnText}>{t.save}</Text>
-              </TouchableOpacity>
+                  {/* Amount input */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: spacing.md }]}>{t.budgetLimit} ({currency})</Text>
+                  <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background }]}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      placeholder="e.g. 5000"
+                      keyboardType="numeric"
+                      value={budgetLimit}
+                      onChangeText={setBudgetLimit}
+                    />
+                  </View>
+
+                  <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveBudget}>
+                    <Text style={styles.saveBtnText}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ==================== GOAL MODAL ==================== */}
-      <Modal visible={showGoalModal} transparent animationType="slide" onRequestClose={() => setShowGoalModal(false)}>
-        <View style={styles.overlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.addGoal}</Text>
-              <TouchableOpacity onPress={() => setShowGoalModal(false)}>
-                <Ionicons name="close-circle" size={24} color={colors.textSecondary} />
-              </TouchableOpacity>
+      <Modal visible={showGoalModal} transparent animationType="slide" onRequestClose={() => setShowGoalModal(false)} statusBarTranslucent={true}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.overlay}>
+              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.addGoal}</Text>
+                  <TouchableOpacity onPress={() => setShowGoalModal(false)}>
+                    <Ionicons name="close-circle" size={24} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.modalBody}>
+                  {/* Goal name */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.goalName}</Text>
+                  <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      placeholder="e.g. Buy Macbook Pro"
+                      value={goalName}
+                      onChangeText={setGoalName}
+                    />
+                  </View>
+
+                  {/* Target amount */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.targetAmount} ({currency})</Text>
+                  <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      placeholder="e.g. 150000"
+                      keyboardType="numeric"
+                      value={goalTarget}
+                      onChangeText={setGoalTarget}
+                    />
+                  </View>
+
+                  {/* Initial savings */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.initialSavings} ({currency})</Text>
+                  <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      placeholder="e.g. 5000 (Optional)"
+                      keyboardType="numeric"
+                      value={goalCurrent}
+                      onChangeText={setGoalCurrent}
+                    />
+                  </View>
+
+                  {/* Target Deadline */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.deadline}</Text>
+                  <TouchableOpacity
+                    style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }]}
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <Text style={{ color: colors.text }}>{formatDateString(goalDeadline)}</Text>
+                    <Ionicons name="calendar-outline" size={18} color={colors.textSecondary} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveGoal}>
+                    <Text style={styles.saveBtnText}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-
-            <View style={styles.modalBody}>
-              {/* Goal name */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.goalName}</Text>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g. Buy Macbook Pro"
-                  value={goalName}
-                  onChangeText={setGoalName}
-                />
-              </View>
-
-              {/* Target amount */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.targetAmount} ({currency})</Text>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g. 150000"
-                  keyboardType="numeric"
-                  value={goalTarget}
-                  onChangeText={setGoalTarget}
-                />
-              </View>
-
-              {/* Initial savings */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.initialSavings} ({currency})</Text>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g. 5000 (Optional)"
-                  keyboardType="numeric"
-                  value={goalCurrent}
-                  onChangeText={setGoalCurrent}
-                />
-              </View>
-
-              {/* Target Deadline */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.deadline}</Text>
-              <TouchableOpacity
-                style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }]}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={{ color: colors.text }}>{formatDateString(goalDeadline)}</Text>
-                <Ionicons name="calendar-outline" size={18} color={colors.textSecondary} />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveGoal}>
-                <Text style={styles.saveBtnText}>{t.save}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ==================== ADD FUND MODAL ==================== */}
-      <Modal visible={showFundModal !== null} transparent animationType="fade" onRequestClose={() => setShowFundModal(null)}>
-        <View style={styles.overlayCenter}>
-          <View style={[styles.alertModal, { backgroundColor: colors.card, padding: spacing.lg }]}>
-            <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h3, textAlign: 'center', marginBottom: 12 }]}>
-              {t.addFundsTitle} "{showFundModal?.name}"
-            </Text>
-            
-            <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 16 }]}>
-              <TextInput
-                style={[styles.input, { color: colors.text }]}
-                placeholder={`Amount (${getCachedCurrencySymbol()})`}
-                keyboardType="numeric"
-                value={fundAmount}
-                onChangeText={setFundAmount}
-                autoFocus
-              />
-            </View>
+      <Modal visible={showFundModal !== null} transparent animationType="fade" onRequestClose={() => setShowFundModal(null)} statusBarTranslucent={true}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.overlayCenter}>
+              <View style={[styles.alertModal, { backgroundColor: colors.card, padding: spacing.lg }]}>
+                <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h3, textAlign: 'center', marginBottom: 12 }]}>
+                  {t.addFundsTitle} "{showFundModal?.name}"
+                </Text>
+                
+                <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 16 }]}>
+                  <TextInput
+                    style={[styles.input, { color: colors.text }]}
+                    placeholder={`Amount (${getCachedCurrencySymbol()})`}
+                    keyboardType="numeric"
+                    value={fundAmount}
+                    onChangeText={setFundAmount}
+                    autoFocus
+                  />
+                </View>
 
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <TouchableOpacity
-                style={[styles.fundModalBtn, { borderColor: colors.border, borderWidth: 1 }]}
-                onPress={() => setShowFundModal(null)}
-              >
-                <Text style={{ color: colors.textSecondary }}>{t.cancel}</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.fundModalBtn, { backgroundColor: colors.primary }]}
-                onPress={handleAddFund}
-              >
-                <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>{t.save}</Text>
-              </TouchableOpacity>
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <TouchableOpacity
+                    style={[styles.fundModalBtn, { borderColor: colors.border, borderWidth: 1 }]}
+                    onPress={() => setShowFundModal(null)}
+                  >
+                    <Text style={{ color: colors.textSecondary }}>{t.cancel}</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={[styles.fundModalBtn, { backgroundColor: colors.primary }]}
+                    onPress={handleAddFund}
+                  >
+                    <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Date picker */}

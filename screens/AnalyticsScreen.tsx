@@ -12,6 +12,9 @@ import {
   TextInput,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -356,83 +359,90 @@ export const AnalyticsScreen: React.FC = () => {
       </ScrollView>
 
       {/* ==================== ADD SUBSCRIPTION MODAL ==================== */}
-      <Modal visible={showSubModal} transparent animationType="slide" onRequestClose={() => setShowSubModal(false)}>
-        <View style={styles.overlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.addSub}</Text>
-              <TouchableOpacity onPress={() => setShowSubModal(false)}>
-                <Ionicons name="close-circle" size={24} color={colors.textSecondary} />
-              </TouchableOpacity>
+      <Modal visible={showSubModal} transparent animationType="slide" onRequestClose={() => setShowSubModal(false)} statusBarTranslucent={true}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.overlay}>
+              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.addSub}</Text>
+                  <TouchableOpacity onPress={() => setShowSubModal(false)}>
+                    <Ionicons name="close-circle" size={24} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.modalBody}>
+                  {/* Sub Name */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.subName}</Text>
+                  <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      placeholder="e.g. Netflix Premium, Spotify Family"
+                      placeholderTextColor={colors.textSecondary}
+                      value={subName}
+                      onChangeText={setSubName}
+                    />
+                  </View>
+
+                  {/* Sub Cost */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.billingCost} ({currency})</Text>
+                  <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      placeholder="e.g. 649"
+                      placeholderTextColor={colors.textSecondary}
+                      keyboardType="numeric"
+                      value={subCost}
+                      onChangeText={setSubCost}
+                    />
+                  </View>
+
+                  {/* Billing Period */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.billingPeriod}</Text>
+                  <View style={styles.periodRow}>
+                    <TouchableOpacity
+                      style={[
+                        styles.periodBtn,
+                        { backgroundColor: colors.background, borderColor: colors.border },
+                        subPeriod === 'monthly' && { borderColor: colors.primary, borderWidth: 1.5 },
+                      ]}
+                      onPress={() => setSubPeriod('monthly')}
+                    >
+                      <Text style={{ color: colors.text }}>{t.monthly}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.periodBtn,
+                        { backgroundColor: colors.background, borderColor: colors.border },
+                        subPeriod === 'yearly' && { borderColor: colors.primary, borderWidth: 1.5 },
+                      ]}
+                      onPress={() => setSubPeriod('yearly')}
+                    >
+                      <Text style={{ color: colors.text }}>{t.yearly}</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Next Billing Date */}
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: 12 }]}>{t.nextBilling}</Text>
+                  <TouchableOpacity
+                    style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }]}
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <Text style={{ color: colors.text }}>{formatDateString(subBillingDate)}</Text>
+                    <Ionicons name="calendar-outline" size={18} color={colors.textSecondary} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveSub}>
+                    <Text style={styles.saveBtnText}>{t.saveSubscription}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-
-            <View style={styles.modalBody}>
-              {/* Sub Name */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.subName}</Text>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g. Netflix Premium, Spotify Family"
-                  placeholderTextColor={colors.textSecondary}
-                  value={subName}
-                  onChangeText={setSubName}
-                />
-              </View>
-
-              {/* Sub Cost */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.billingCost} ({currency})</Text>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g. 649"
-                  placeholderTextColor={colors.textSecondary}
-                  keyboardType="numeric"
-                  value={subCost}
-                  onChangeText={setSubCost}
-                />
-              </View>
-
-              {/* Billing Period */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.billingPeriod}</Text>
-              <View style={styles.periodRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.periodBtn,
-                    { backgroundColor: colors.background, borderColor: colors.border },
-                    subPeriod === 'monthly' && { borderColor: colors.primary, borderWidth: 1.5 },
-                  ]}
-                  onPress={() => setSubPeriod('monthly')}
-                >
-                  <Text style={{ color: colors.text }}>{t.monthly}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.periodBtn,
-                    { backgroundColor: colors.background, borderColor: colors.border },
-                    subPeriod === 'yearly' && { borderColor: colors.primary, borderWidth: 1.5 },
-                  ]}
-                  onPress={() => setSubPeriod('yearly')}
-                >
-                  <Text style={{ color: colors.text }}>{t.yearly}</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Next Billing Date */}
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: 12 }]}>{t.nextBilling}</Text>
-              <TouchableOpacity
-                style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }]}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={{ color: colors.text }}>{formatDateString(subBillingDate)}</Text>
-                <Ionicons name="calendar-outline" size={18} color={colors.textSecondary} />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveSub}>
-                <Text style={styles.saveBtnText}>{t.saveSubscription}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Date Picker */}

@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
@@ -97,11 +97,26 @@ export const ExportService = {
         return true;
       } else {
         const { uri } = await Print.printToFileAsync({ html: htmlContent });
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Export PDF Report' });
+        const isSharingAvailable = await Sharing.isAvailableAsync();
+        if (isSharingAvailable) {
+          await Sharing.shareAsync(uri, { 
+            mimeType: 'application/pdf', 
+            dialogTitle: 'Export PDF Report',
+            UTI: 'com.adobe.pdf' 
+          });
+        } else {
+          const permanentUri = `${(FileSystem as any).documentDirectory}Spendly_Report_${Date.now()}.pdf`;
+          await FileSystem.copyAsync({ from: uri, to: permanentUri });
+          Alert.alert(
+            'Export Successful',
+            `Sharing is not supported on this device/emulator. The PDF report has been saved locally at:\n\n${permanentUri}`
+          );
+        }
         return true;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to export PDF', error);
+      Alert.alert('Export Error', `Failed to export PDF: ${error.message || error}`);
       return false;
     }
   },
@@ -130,11 +145,24 @@ export const ExportService = {
       } else {
         const fileUri = `${(FileSystem as any).documentDirectory}Spendly_Report_${Date.now()}.csv`;
         await FileSystem.writeAsStringAsync(fileUri, csvContent, { encoding: (FileSystem as any).EncodingType.UTF8 });
-        await Sharing.shareAsync(fileUri, { mimeType: 'text/csv', dialogTitle: 'Export CSV Report' });
+        const isSharingAvailable = await Sharing.isAvailableAsync();
+        if (isSharingAvailable) {
+          await Sharing.shareAsync(fileUri, { 
+            mimeType: 'text/csv', 
+            dialogTitle: 'Export CSV Report',
+            UTI: 'public.comma-separated-values-text' 
+          });
+        } else {
+          Alert.alert(
+            'Export Successful',
+            `Sharing is not supported on this device/emulator. The CSV report has been saved locally at:\n\n${fileUri}`
+          );
+        }
         return true;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to export CSV', error);
+      Alert.alert('Export Error', `Failed to export CSV: ${error.message || error}`);
       return false;
     }
   }
