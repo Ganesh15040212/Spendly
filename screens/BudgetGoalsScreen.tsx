@@ -433,7 +433,7 @@ export const BudgetGoalsScreen: React.FC = () => {
       {/* ==================== BUDGET MODAL ==================== */}
       <Modal visible={showBudgetModal} transparent animationType="slide" onRequestClose={() => setShowBudgetModal(false)} statusBarTranslucent={true}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -490,7 +490,7 @@ export const BudgetGoalsScreen: React.FC = () => {
       {/* ==================== GOAL MODAL ==================== */}
       <Modal visible={showGoalModal} transparent animationType="slide" onRequestClose={() => setShowGoalModal(false)} statusBarTranslucent={true}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -562,7 +562,7 @@ export const BudgetGoalsScreen: React.FC = () => {
       {/* ==================== ADD FUND MODAL ==================== */}
       <Modal visible={showFundModal !== null} transparent animationType="fade" onRequestClose={() => setShowFundModal(null)} statusBarTranslucent={true}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

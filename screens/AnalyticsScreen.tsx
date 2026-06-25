@@ -361,7 +361,7 @@ export const AnalyticsScreen: React.FC = () => {
       {/* ==================== ADD SUBSCRIPTION MODAL ==================== */}
       <Modal visible={showSubModal} transparent animationType="slide" onRequestClose={() => setShowSubModal(false)} statusBarTranslucent={true}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
