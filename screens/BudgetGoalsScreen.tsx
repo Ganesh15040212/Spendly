@@ -438,7 +438,7 @@ export const BudgetGoalsScreen: React.FC = () => {
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.overlay}>
-              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
+              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg, maxHeight: '85%' }]}>
                 <View style={styles.modalHeader}>
                   <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.setBudget}</Text>
                   <TouchableOpacity onPress={() => setShowBudgetModal(false)}>
@@ -446,7 +446,7 @@ export const BudgetGoalsScreen: React.FC = () => {
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.modalBody}>
+                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: spacing.md }}>
                   {/* Category selector */}
                   <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.selectCategory}</Text>
                   <View style={styles.categoryPicker}>
@@ -480,7 +480,7 @@ export const BudgetGoalsScreen: React.FC = () => {
                   <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveBudget}>
                     <Text style={styles.saveBtnText}>{t.save}</Text>
                   </TouchableOpacity>
-                </View>
+                </ScrollView>
               </View>
             </View>
           </TouchableWithoutFeedback>
@@ -495,7 +495,7 @@ export const BudgetGoalsScreen: React.FC = () => {
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.overlay}>
-              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
+              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg, maxHeight: '85%' }]}>
                 <View style={styles.modalHeader}>
                   <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.addGoal}</Text>
                   <TouchableOpacity onPress={() => setShowGoalModal(false)}>
@@ -503,7 +503,7 @@ export const BudgetGoalsScreen: React.FC = () => {
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.modalBody}>
+                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: spacing.md }}>
                   {/* Goal name */}
                   <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.goalName}</Text>
                   <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
@@ -552,7 +552,7 @@ export const BudgetGoalsScreen: React.FC = () => {
                   <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveGoal}>
                     <Text style={styles.saveBtnText}>{t.save}</Text>
                   </TouchableOpacity>
-                </View>
+                </ScrollView>
               </View>
             </View>
           </TouchableWithoutFeedback>

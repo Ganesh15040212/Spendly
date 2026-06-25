@@ -366,7 +366,7 @@ export const AnalyticsScreen: React.FC = () => {
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.overlay}>
-              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
+              <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg, maxHeight: '85%' }]}>
                 <View style={styles.modalHeader}>
                   <Text style={[styles.modalTitle, { color: colors.text, fontSize: sizes.h2 }]}>{t.addSub}</Text>
                   <TouchableOpacity onPress={() => setShowSubModal(false)}>
@@ -374,7 +374,7 @@ export const AnalyticsScreen: React.FC = () => {
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.modalBody}>
+                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: spacing.md }}>
                   {/* Sub Name */}
                   <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.subName}</Text>
                   <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background, marginBottom: 12 }]}>
@@ -438,7 +438,7 @@ export const AnalyticsScreen: React.FC = () => {
                   <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveSub}>
                     <Text style={styles.saveBtnText}>{t.saveSubscription}</Text>
                   </TouchableOpacity>
-                </View>
+                </ScrollView>
               </View>
             </View>
           </TouchableWithoutFeedback>

@@ -10,6 +10,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
 } from 'react-native';
 import { useTheme } from '../utils/theme';
 import { getCachedCurrencySymbol } from '../utils/helpers';
@@ -56,7 +57,7 @@ export const OpeningBalanceModal: React.FC<OpeningBalanceModalProps> = ({
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.overlay}>
-            <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg }]}>
+            <View style={[styles.modalContent, { backgroundColor: colors.card, padding: spacing.lg, maxHeight: '85%' }]}>
               {/* Header */}
               <View style={styles.header}>
                 <Text style={[styles.title, { color: colors.text, fontSize: sizes.h2 }]}>
@@ -67,46 +68,48 @@ export const OpeningBalanceModal: React.FC<OpeningBalanceModalProps> = ({
                 </TouchableOpacity>
               </View>
 
-              <Text style={[styles.subtitle, { color: colors.textSecondary, marginBottom: spacing.md }]}>
-                {t.language === 'hi'
-                  ? 'अपने खाते का प्रारंभिक शेष कॉन्फ़िगर करें। यह शेष आपकी कुल आय और व्यय में जोड़ा जाएगा।'
-                  : t.language === 'ta'
-                  ? 'உங்கள் தொடக்கக் கணக்கின் இருப்பை உள்ளமைக்கவும். இந்த இருப்பு உங்கள் மொத்த வருமானம் மற்றும் செலவுகளுடன் சேர்க்கப்படும்.'
-                  : t.language === 'es'
-                  ? 'Configure el saldo inicial de su cuenta. Este saldo se sumará a sus ingresos y gastos totales.'
-                  : 'Configure your starting account balance. This balance will be added to your total income and expenses.'}
-              </Text>
+              <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                <Text style={[styles.subtitle, { color: colors.textSecondary, marginBottom: spacing.md }]}>
+                  {t.language === 'hi'
+                    ? 'अपने खाते का प्रारंभिक शेष कॉन्फ़िगर करें। यह शेष आपकी कुल आय और व्यय में जोड़ा जाएगा।'
+                    : t.language === 'ta'
+                    ? 'உங்கள் தொடக்கக் கணக்கின் இருப்பை உள்ளமைக்கவும். இந்த இருப்பு உங்கள் மொத்த வருமானம் மற்றும் செலவுகளுடன் சேர்க்கப்படும்.'
+                    : t.language === 'es'
+                    ? 'Configure el saldo inicial de su cuenta. Este saldo se sumará a sus ingresos y gastos totales.'
+                    : 'Configure your starting account balance. This balance will be added to your total income and expenses.'}
+                </Text>
 
-              {/* Input */}
-              <View style={[styles.inputContainer, { borderColor: colors.border, marginBottom: spacing.lg }]}>
-                <Text style={[styles.currencyPrefix, { color: colors.text }]}>{currency}</Text>
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  keyboardType="numeric"
-                  placeholder="0.00"
-                  placeholderTextColor={colors.textSecondary}
-                  value={inputValue}
-                  onChangeText={setInputValue}
-                  autoFocus
-                />
-              </View>
+                {/* Input */}
+                <View style={[styles.inputContainer, { borderColor: colors.border, marginBottom: spacing.lg }]}>
+                  <Text style={[styles.currencyPrefix, { color: colors.text }]}>{currency}</Text>
+                  <TextInput
+                    style={[styles.input, { color: colors.text }]}
+                    keyboardType="numeric"
+                    placeholder="0.00"
+                    placeholderTextColor={colors.textSecondary}
+                    value={inputValue}
+                    onChangeText={setInputValue}
+                    autoFocus
+                  />
+                </View>
 
-              {/* Action Buttons */}
-              <View style={styles.actions}>
-                <TouchableOpacity
-                  style={[styles.button, styles.cancelButton, { borderColor: colors.border }]}
-                  onPress={onClose}
-                >
-                  <Text style={[styles.buttonText, { color: colors.textSecondary }]}>{t.cancel}</Text>
-                </TouchableOpacity>
+                {/* Action Buttons */}
+                <View style={styles.actions}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.cancelButton, { borderColor: colors.border }]}
+                    onPress={onClose}
+                  >
+                    <Text style={[styles.buttonText, { color: colors.textSecondary }]}>{t.cancel}</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[styles.button, styles.saveButton, { backgroundColor: colors.primary }]}
-                  onPress={handleSave}
-                >
-                  <Text style={[styles.buttonText, { color: '#ffffff', fontWeight: 'bold' }]}>{t.save}</Text>
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity
+                    style={[styles.button, styles.saveButton, { backgroundColor: colors.primary }]}
+                    onPress={handleSave}
+                  >
+                    <Text style={[styles.buttonText, { color: '#ffffff', fontWeight: 'bold' }]}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
           </View>
         </TouchableWithoutFeedback>
