@@ -67,6 +67,8 @@ router.post('/auth/register', async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        profilePicture: user.profilePicture || 'avatar1',
+        customCategories: user.customCategories || { income: {}, expense: {} },
       },
     });
   } catch (err) {
@@ -100,6 +102,8 @@ router.post('/auth/login', async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        profilePicture: user.profilePicture || 'avatar1',
+        customCategories: user.customCategories || { income: {}, expense: {} },
       },
     });
   } catch (err) {
@@ -274,8 +278,18 @@ router.delete('/subscriptions/:id', protect, async (req, res) => {
 
 router.post('/sync', protect, async (req, res) => {
   try {
-    const { transactions, budgets, goals, subscriptions, openingBalance } = req.body;
+    const { transactions, budgets, goals, subscriptions, openingBalance, profilePicture, customCategories } = req.body;
     const userId = req.user.id;
+
+    // Update User Profile details if sent
+    if (profilePicture || customCategories) {
+      const user = await User.findById(userId);
+      if (user) {
+        if (profilePicture) user.profilePicture = profilePicture;
+        if (customCategories) user.customCategories = customCategories;
+        await user.save();
+      }
+    }
 
     // 1. Sync User Opening Balance Configuration
     let config = await UserConfig.findOne({ user: userId });
@@ -390,6 +404,7 @@ router.post('/sync', protect, async (req, res) => {
     const currentGoals = await Goal.find({ user: userId });
     const currentSubs = await Subscription.find({ user: userId });
 
+    const updatedUser = await User.findById(userId);
     res.json({
       success: true,
       config,
@@ -397,6 +412,8 @@ router.post('/sync', protect, async (req, res) => {
       budgets: currentBudgets,
       goals: currentGoals,
       subscriptions: currentSubs,
+      profilePicture: updatedUser ? updatedUser.profilePicture : 'avatar1',
+      customCategories: updatedUser ? updatedUser.customCategories : { income: {}, expense: {} },
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

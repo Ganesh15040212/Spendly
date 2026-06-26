@@ -108,6 +108,7 @@ export interface TranslationDict {
   monthly: string;
   yearly: string;
   categoryExpenses: string;
+  cashFlowTrend: string;
   noExpensesToAnalyze: string;
   noSubsRegistered: string;
   saveSubscription: string;
@@ -271,6 +272,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     monthly: 'Monthly',
     yearly: 'Yearly',
     categoryExpenses: 'Category Expenses',
+    cashFlowTrend: 'Cash Flow Trend',
     noExpensesToAnalyze: 'No expenses recorded to analyze.',
     noSubsRegistered: 'No active subscription plans registered.',
     saveSubscription: 'Save Subscription',
@@ -429,6 +431,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     monthly: 'मासिक',
     yearly: 'वार्षिक',
     categoryExpenses: 'श्रेणीवार खर्च',
+    cashFlowTrend: 'नकद प्रवाह प्रवृत्ति',
     noExpensesToAnalyze: 'विश्लेषण करने के लिए कोई खर्च दर्ज नहीं है।',
     noSubsRegistered: 'कोई सक्रिय सदस्यता योजना पंजीकृत नहीं है।',
     saveSubscription: 'सदस्यता सहेजें',
@@ -587,6 +590,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     monthly: 'மாதம்',
     yearly: 'வருடம்',
     categoryExpenses: 'வகை வாரியான செலவுகள்',
+    cashFlowTrend: 'பணப் புழக்கப் போக்கு',
     noExpensesToAnalyze: 'பகுப்பாய்வு செய்ய செலவுகள் எதுவும் பதிவு செய்யப்படவில்லை.',
     noSubsRegistered: 'செயலில் உள்ள சந்தா திட்டங்கள் எதுவும் பதிவு செய்யப்படவில்லை.',
     saveSubscription: 'சந்தாவைச் சேமி',
@@ -745,6 +749,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     monthly: 'Mensual',
     yearly: 'Anual',
     categoryExpenses: 'Gastos por Categoría',
+    cashFlowTrend: 'Tendencia de Flujo de Caja',
     noExpensesToAnalyze: 'No hay gastos registrados para analizar.',
     noSubsRegistered: 'No hay planes de suscripción activos registrados.',
     saveSubscription: 'Guardar Suscripción',

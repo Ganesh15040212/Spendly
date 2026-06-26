@@ -1,4 +1,5 @@
 // Client-side Database Schemas and Typings for AsyncStorage & Sync
+import { CategoryConfig } from '../utils/helpers';
 
 export interface User {
   id: string;
@@ -6,6 +7,11 @@ export interface User {
   email: string;
   phone: string;
   role: 'user' | 'admin';
+  profilePicture?: string;
+  customCategories?: {
+    income: Record<string, CategoryConfig>;
+    expense: Record<string, CategoryConfig>;
+  };
 }
 
 export type WalletType = 'Cash' | 'Bank' | 'UPI' | 'Credit Card' | 'Digital Wallet';

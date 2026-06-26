@@ -21,7 +21,7 @@ import { useTheme } from '../utils/theme';
 import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
 import { Budget, Goal } from '../database/schema';
-import { formatCurrency, getTodayString, formatDateString, getStartAndEndDates, EXPENSE_CATEGORIES, getCachedCurrencySymbol } from '../utils/helpers';
+import { formatCurrency, getTodayString, formatDateString, getStartAndEndDates, getMergedCategories, getCachedCurrencySymbol } from '../utils/helpers';
 import { translateCategory } from '../utils/translations';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -46,7 +46,7 @@ export const BudgetGoalsScreen: React.FC = () => {
   const [showFundModal, setShowFundModal] = useState<Goal | null>(null);
 
   // Form states (Budget)
-  const [budgetCategory, setBudgetCategory] = useState(Object.keys(EXPENSE_CATEGORIES)[0]);
+  const [budgetCategory, setBudgetCategory] = useState(Object.keys(getMergedCategories('expense'))[0]);
   const [budgetLimit, setBudgetLimit] = useState('');
 
   // Form states (Goal)
@@ -450,7 +450,7 @@ export const BudgetGoalsScreen: React.FC = () => {
                   {/* Category selector */}
                   <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.selectCategory}</Text>
                   <View style={styles.categoryPicker}>
-                    {Object.keys(EXPENSE_CATEGORIES).map(cat => (
+                    {Object.keys(getMergedCategories('expense')).map(cat => (
                       <TouchableOpacity
                         key={cat}
                         style={[

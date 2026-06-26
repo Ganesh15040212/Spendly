@@ -19,8 +19,7 @@ import { WalletType } from '../database/schema';
 import {
   getTodayString,
   formatDateString,
-  INCOME_CATEGORIES,
-  EXPENSE_CATEGORIES,
+  getMergedCategories,
   getCachedCurrencySymbol,
 } from '../utils/helpers';
 import { Ionicons } from '@expo/vector-icons';
@@ -97,8 +96,8 @@ export const AddTransactionScreen: React.FC = () => {
     const isAutofill = params && params.amount !== undefined;
     if (!isEditMode && !isAutofill) {
       const defaultCat = type === 'income' 
-        ? Object.keys(INCOME_CATEGORIES)[0] 
-        : Object.keys(EXPENSE_CATEGORIES)[0];
+        ? Object.keys(getMergedCategories('income'))[0] 
+        : Object.keys(getMergedCategories('expense'))[0];
       setCategory(defaultCat);
     }
   }, [type, isEditMode]);
@@ -194,7 +193,7 @@ export const AddTransactionScreen: React.FC = () => {
     return translateWalletHelper(w, language);
   };
 
-  const categoryList = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const categoryList = getMergedCategories(type);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>

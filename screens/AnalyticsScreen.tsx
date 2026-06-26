@@ -23,7 +23,7 @@ import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
 import { Subscription } from '../database/schema';
 import { formatCurrency, getCategoryConfig, getTodayString, formatDateString, getCachedCurrencySymbol } from '../utils/helpers';
-import { PieChart, BarChart } from 'react-native-chart-kit';
+import { PieChart, BarChart, LineChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomDatePicker as DateTimePicker } from '../components/CustomDatePicker';
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
@@ -270,6 +270,43 @@ export const AnalyticsScreen: React.FC = () => {
               paddingLeft="15"
               absolute
             />
+          )}
+        </View>
+
+        {/* Line Chart Card (Income vs Expenses Trend) */}
+        <View style={[styles.chartCard, { backgroundColor: colors.card, marginHorizontal: spacing.md, marginTop: spacing.md }, shadows]}>
+          <Text style={[styles.chartTitle, { color: colors.text, marginBottom: spacing.md }]} adjustsFontSizeToFit={true} numberOfLines={1}>
+            {t.cashFlowTrend}
+          </Text>
+
+          {transactions.length === 0 ? (
+            <Text style={[styles.noDataText, { color: colors.textSecondary, paddingVertical: spacing.xl }]}>
+              {t.noTransactions}
+            </Text>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingRight: 8 }}
+            >
+              <LineChart
+                style={{ marginVertical: 8, borderRadius: 16 }}
+                data={monthlyBarData}
+                width={Math.max(chartWidth, 340)}
+                height={220}
+                chartConfig={{
+                  ...chartConfig,
+                  propsForDots: {
+                    r: '4',
+                    strokeWidth: '1',
+                    stroke: colors.card,
+                  }
+                }}
+                bezier
+                yAxisLabel={getCachedCurrencySymbol()}
+                yAxisSuffix=""
+              />
+            </ScrollView>
           )}
         </View>
 

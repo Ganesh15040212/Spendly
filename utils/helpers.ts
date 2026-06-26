@@ -4,6 +4,17 @@ let cachedCurrencySymbol = '₹';
 let cachedCurrencyCode = 'INR';
 let cachedLocale = 'en-IN';
 
+let cachedCustomIncomeCategories: Record<string, CategoryConfig> = {};
+let cachedCustomExpenseCategories: Record<string, CategoryConfig> = {};
+
+export const setCachedCustomCategories = (
+  income: Record<string, CategoryConfig>,
+  expense: Record<string, CategoryConfig>
+) => {
+  cachedCustomIncomeCategories = income || {};
+  cachedCustomExpenseCategories = expense || {};
+};
+
 export const setCachedCurrency = (symbol: string) => {
   cachedCurrencySymbol = symbol || '₹';
   if (symbol === '₹') {
@@ -103,8 +114,15 @@ export const EXPENSE_CATEGORIES: Record<string, CategoryConfig> = {
 };
 
 export const getCategoryConfig = (category: string, type: 'income' | 'expense'): CategoryConfig => {
-  const map = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-  return map[category] || { name: category, icon: 'help-circle-outline', color: '#64748b' };
+  const staticMap = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const customMap = type === 'income' ? cachedCustomIncomeCategories : cachedCustomExpenseCategories;
+  return staticMap[category] || customMap[category] || { name: category, icon: 'help-circle-outline', color: '#64748b' };
+};
+
+export const getMergedCategories = (type: 'income' | 'expense'): Record<string, CategoryConfig> => {
+  const staticMap = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const customMap = type === 'income' ? cachedCustomIncomeCategories : cachedCustomExpenseCategories;
+  return { ...staticMap, ...customMap };
 };
 
 // Date Range Filter Helpers

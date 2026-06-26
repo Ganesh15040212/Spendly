@@ -33,6 +33,14 @@ const UserSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    profilePicture: {
+      type: String,
+      default: 'avatar1',
+    },
+    customCategories: {
+      type: Object,
+      default: { income: {}, expense: {} },
+    },
   },
   {
     timestamps: true,

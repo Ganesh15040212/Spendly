@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Transaction, Budget, Goal, Subscription, User } from '../database/schema';
+import { CategoryConfig } from '../utils/helpers';
 
 const KEYS = {
   TRANSACTIONS: '@spendly_transactions',
@@ -12,6 +13,7 @@ const KEYS = {
   THEME_MODE: '@spendly_theme_mode',
   CURRENCY_SYMBOL: '@spendly_currency_symbol',
   PROFILE_PICTURE: '@spendly_profile_picture',
+  CUSTOM_CATEGORIES: '@spendly_custom_categories',
 };
 
 export const generateUUID = (): string => {
@@ -245,6 +247,34 @@ export const StorageService = {
     }
   },
 
+  // Custom Categories
+  getCustomCategories: async (): Promise<{ income: Record<string, CategoryConfig>; expense: Record<string, CategoryConfig> }> => {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.CUSTOM_CATEGORIES);
+      return data ? JSON.parse(data) : { income: {}, expense: {} };
+    } catch (e) {
+      return { income: {}, expense: {} };
+    }
+  },
+
+  addCustomCategory: async (type: 'income' | 'expense', category: CategoryConfig): Promise<void> => {
+    try {
+      const data = await StorageService.getCustomCategories();
+      data[type][category.name] = category;
+      await AsyncStorage.setItem(KEYS.CUSTOM_CATEGORIES, JSON.stringify(data));
+    } catch (e) {
+      console.error('Failed to add custom category', e);
+    }
+  },
+
+  saveCustomCategories: async (cats: { income: Record<string, CategoryConfig>; expense: Record<string, CategoryConfig> }): Promise<void> => {
+    try {
+      await AsyncStorage.setItem(KEYS.CUSTOM_CATEGORIES, JSON.stringify(cats));
+    } catch (e) {
+      console.error('Failed to save custom categories', e);
+    }
+  },
+
   // Clear all configurations
   clearAll: async (): Promise<void> => {
     try {
@@ -255,6 +285,7 @@ export const StorageService = {
       await AsyncStorage.removeItem(KEYS.BUDGETS);
       await AsyncStorage.removeItem(KEYS.GOALS);
       await AsyncStorage.removeItem(KEYS.SUBSCRIPTIONS);
+      await AsyncStorage.removeItem(KEYS.CUSTOM_CATEGORIES);
     } catch (e) {
       console.error('Failed to clear storage', e);
     }

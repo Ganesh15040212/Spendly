@@ -19,6 +19,7 @@ import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { setCachedCustomCategories, getMergedCategories } from '../utils/helpers';
 
 // 6 Premium Avatar Icon configurations
 const AVATARS = [
@@ -28,6 +29,32 @@ const AVATARS = [
   { id: 'avatar4', icon: 'person-outline', color: '#06b6d4', label: 'Tech Budgeter' },
   { id: 'avatar5', icon: 'ribbon-outline', color: '#8b5cf6', label: 'Goal Getter' },
   { id: 'avatar6', icon: 'trending-up-outline', color: '#f43f5e', label: 'Wealth Guru' },
+];
+
+const COLOR_PRESETS = [
+  '#10b981', // Emerald Green
+  '#f43f5e', // Rose Red
+  '#f59e0b', // Amber Orange
+  '#3b82f6', // Blue
+  '#06b6d4', // Cyan
+  '#8b5cf6', // Violet/Purple
+  '#ec4899', // Pink
+  '#6366f1', // Indigo
+];
+
+const ICON_PRESETS = [
+  'barbell-outline',
+  'heart-outline',
+  'gift-outline',
+  'game-controller-outline',
+  'briefcase-outline',
+  'book-outline',
+  'car-outline',
+  'home-outline',
+  'cart-outline',
+  'restaurant-outline',
+  'medical-outline',
+  'laptop-outline',
 ];
 
 export const ProfileScreen: React.FC = () => {
@@ -45,6 +72,7 @@ export const ProfileScreen: React.FC = () => {
     profilePicture,
     setProfilePicture,
     t,
+    language,
   } = useTheme();
 
   const router = useRouter();
@@ -59,6 +87,12 @@ export const ProfileScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+
+  // Custom Category states
+  const [catName, setCatName] = useState('');
+  const [catType, setCatType] = useState<'income' | 'expense'>('expense');
+  const [catColor, setCatColor] = useState('#6366f1'); // Default Indigo
+  const [catIcon, setCatIcon] = useState('options-outline'); // Default custom icon
 
   // Load initial settings from storage
   useEffect(() => {
@@ -157,6 +191,49 @@ export const ProfileScreen: React.FC = () => {
     } catch (error) {
       console.error('Error selecting image:', error);
       Alert.alert(t.error, 'Failed to pick image from gallery.');
+    }
+  };
+
+  const handleSaveCategory = async () => {
+    const trimmedName = catName.trim();
+    if (!trimmedName) {
+      Alert.alert('Error', 'Please enter a category name');
+      return;
+    }
+
+    // Check if category name is unique
+    const mergedCats = getMergedCategories(catType);
+    const exists = Object.keys(mergedCats).some(
+      key => key.toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (exists) {
+      Alert.alert('Error', `A category named "${trimmedName}" already exists for ${catType}s.`);
+      return;
+    }
+
+    const newCategory = {
+      name: trimmedName,
+      icon: catIcon,
+      color: catColor,
+    };
+
+    try {
+      await StorageService.addCustomCategory(catType, newCategory);
+
+      // Update in-memory cache immediately
+      const customCats = await StorageService.getCustomCategories();
+      setCachedCustomCategories(customCats.income, customCats.expense);
+
+      Alert.alert('Success', `Category "${trimmedName}" has been successfully added to your ${catType} list.`);
+      
+      // Reset form
+      setCatName('');
+      setCatIcon('options-outline');
+      setCatColor('#6366f1');
+    } catch (e) {
+      console.error('Failed to save category', e);
+      Alert.alert('Error', 'An error occurred while saving the custom category.');
     }
   };
 
@@ -298,6 +375,133 @@ export const ProfileScreen: React.FC = () => {
               })}
             </View>
           </View>
+        </View>
+
+        {/* Custom Categories Header */}
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginHorizontal: spacing.md, marginTop: spacing.lg }]}>
+          {language === 'ta' ? 'தனிப்பயன் வகைகள்' : language === 'hi' ? 'कस्टम श्रेणियां' : language === 'es' ? 'Categorías Personalizadas' : 'Custom Categories'}
+        </Text>
+
+        <View style={[styles.preferencesContainer, { backgroundColor: colors.card, marginHorizontal: spacing.md, padding: 16 }, shadows]}>
+          <Text style={[styles.prefLabel, { color: colors.text, marginBottom: 12 }]}>
+            {language === 'ta' ? 'புதிய வகையைச் சேர்க்கவும்' : language === 'hi' ? 'नई श्रेणी जोड़ें' : language === 'es' ? 'Agregar Nueva Categoría' : 'Add New Category'}
+          </Text>
+
+          {/* Category Name Input */}
+          <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background }]}>
+            <TextInput
+              style={[styles.inputField, { color: colors.text }]}
+              placeholder={language === 'ta' ? 'வகை பெயர் (எ.கா. ஜிம்)' : language === 'hi' ? 'श्रेणी का नाम (जैसे जिम)' : language === 'es' ? 'Nombre (ej. Gimnasio)' : 'Category Name (e.g. Gym)'}
+              placeholderTextColor={colors.textSecondary + '70'}
+              value={catName}
+              onChangeText={setCatName}
+            />
+          </View>
+
+          {/* Category Type selector */}
+          <View style={{ marginBottom: 16 }}>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginBottom: 8 }]}>
+              {language === 'ta' ? 'வகை வகை' : language === 'hi' ? 'श्रेणी का प्रकार' : language === 'es' ? 'Tipo de Categoría' : 'Category Type'}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity
+                style={[
+                  styles.selectorBtn,
+                  { borderColor: colors.border, backgroundColor: colors.background },
+                  catType === 'expense' && { backgroundColor: colors.expense, borderColor: colors.expense },
+                ]}
+                onPress={() => setCatType('expense')}
+              >
+                <Text style={{ color: catType === 'expense' ? '#ffffff' : colors.text, fontWeight: 'bold' }}>
+                  {t.expense}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.selectorBtn,
+                  { borderColor: colors.border, backgroundColor: colors.background },
+                  catType === 'income' && { backgroundColor: colors.income, borderColor: colors.income },
+                ]}
+                onPress={() => setCatType('income')}
+              >
+                <Text style={{ color: catType === 'income' ? '#ffffff' : colors.text, fontWeight: 'bold' }}>
+                  {t.income}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Preset Colors selector */}
+          <View style={{ marginBottom: 16 }}>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginBottom: 8 }]}>
+              {language === 'ta' ? 'வண்ணத்தைத் தேர்வுசெய்க' : language === 'hi' ? 'रंग चुनें' : language === 'es' ? 'Seleccionar Color' : 'Select Color'}
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+              {COLOR_PRESETS.map(color => {
+                const isSelected = catColor === color;
+                return (
+                  <TouchableOpacity
+                    key={color}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      backgroundColor: color,
+                      borderWidth: isSelected ? 3 : 0,
+                      borderColor: colors.text,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                    onPress={() => setCatColor(color)}
+                  >
+                    {isSelected && (
+                      <Ionicons name="checkmark" size={16} color="#ffffff" />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Preset Icons selector */}
+          <View style={{ marginBottom: 20 }}>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginBottom: 8 }]}>
+              {language === 'ta' ? 'சின்னத்தைத் தேர்வுசெய்க' : language === 'hi' ? 'आइकन चुनें' : language === 'es' ? 'Seleccionar Icono' : 'Select Icon'}
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+              {ICON_PRESETS.map(iconName => {
+                const isSelected = catIcon === iconName;
+                return (
+                  <TouchableOpacity
+                    key={iconName}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      backgroundColor: isSelected ? colors.primaryLight : colors.background,
+                      borderWidth: isSelected ? 1.5 : 1,
+                      borderColor: isSelected ? colors.primary : colors.border,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                    onPress={() => setCatIcon(iconName)}
+                  >
+                    <Ionicons name={iconName as any} size={20} color={isSelected ? colors.primary : colors.textSecondary} />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Add Category Button */}
+          <TouchableOpacity
+            style={[styles.saveBtn, { backgroundColor: colors.primary, marginTop: 0 }, shadows]}
+            onPress={handleSaveCategory}
+          >
+            <Text style={styles.saveBtnText}>
+              {language === 'ta' ? 'வகையைச் சேமி' : language === 'hi' ? 'श्रेणी सहेजें' : language === 'es' ? 'Guardar Categoría' : 'Save Category'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Save, Reset and Logout Actions */}
