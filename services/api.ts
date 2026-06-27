@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { StorageService } from './storage';
 import { Transaction, Budget, Goal, Subscription } from '../database/schema';
-import { setCachedCustomCategories } from '../utils/helpers';
+import { setCachedCurrency, setCachedCustomCategories, setCachedCustomWallets } from '../utils/helpers';
 
 // Define your production Render backend API URL here
 const PROD_API_URL = 'https://spendly-632z.onrender.com/api';
@@ -64,6 +64,10 @@ export const ApiService = {
         await StorageService.saveCustomCategories(result.user.customCategories);
         setCachedCustomCategories(result.user.customCategories.income, result.user.customCategories.expense);
       }
+      if (result.user.customWallets) {
+        await StorageService.saveCustomWallets(result.user.customWallets);
+        setCachedCustomWallets(result.user.customWallets);
+      }
       return { success: true as const, user: result.user, offline: false, error: undefined };
     } catch (e: any) {
       return { success: false as const, error: e.message || 'Registration failed', user: undefined, offline: undefined };
@@ -119,6 +123,10 @@ export const ApiService = {
         await StorageService.saveCustomCategories(result.user.customCategories);
         setCachedCustomCategories(result.user.customCategories.income, result.user.customCategories.expense);
       }
+      if (result.user.customWallets) {
+        await StorageService.saveCustomWallets(result.user.customWallets);
+        setCachedCustomWallets(result.user.customWallets);
+      }
       return { success: true as const, user: result.user, offline: false, error: undefined };
     } catch (e: any) {
       return { success: false as const, error: e.message || 'Login failed', user: undefined, offline: undefined };
@@ -138,6 +146,7 @@ export const ApiService = {
       const openingBalance = await StorageService.getOpeningBalance();
       const profilePicture = await StorageService.getProfilePicture();
       const customCategories = await StorageService.getCustomCategories();
+      const customWallets = await StorageService.getCustomWallets();
 
       const response = await fetch(`${API_URL}/sync`, {
         method: 'POST',
@@ -153,6 +162,7 @@ export const ApiService = {
           openingBalance,
           profilePicture,
           customCategories,
+          customWallets,
         }),
       });
 
@@ -218,6 +228,10 @@ export const ApiService = {
         if (result.customCategories) {
           await StorageService.saveCustomCategories(result.customCategories);
           setCachedCustomCategories(result.customCategories.income, result.customCategories.expense);
+        }
+        if (result.customWallets) {
+          await StorageService.saveCustomWallets(result.customWallets);
+          setCachedCustomWallets(result.customWallets);
         }
 
         return { success: true, message: 'Sync completed successfully!' };

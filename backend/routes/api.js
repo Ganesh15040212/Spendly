@@ -69,6 +69,7 @@ router.post('/auth/register', async (req, res) => {
         role: user.role,
         profilePicture: user.profilePicture || 'avatar1',
         customCategories: user.customCategories || { income: {}, expense: {} },
+        customWallets: user.customWallets || [],
       },
     });
   } catch (err) {
@@ -104,6 +105,7 @@ router.post('/auth/login', async (req, res) => {
         role: user.role,
         profilePicture: user.profilePicture || 'avatar1',
         customCategories: user.customCategories || { income: {}, expense: {} },
+        customWallets: user.customWallets || [],
       },
     });
   } catch (err) {
@@ -278,15 +280,16 @@ router.delete('/subscriptions/:id', protect, async (req, res) => {
 
 router.post('/sync', protect, async (req, res) => {
   try {
-    const { transactions, budgets, goals, subscriptions, openingBalance, profilePicture, customCategories } = req.body;
+    const { transactions, budgets, goals, subscriptions, openingBalance, profilePicture, customCategories, customWallets } = req.body;
     const userId = req.user.id;
 
     // Update User Profile details if sent
-    if (profilePicture || customCategories) {
+    if (profilePicture || customCategories || customWallets) {
       const user = await User.findById(userId);
       if (user) {
         if (profilePicture) user.profilePicture = profilePicture;
         if (customCategories) user.customCategories = customCategories;
+        if (customWallets) user.customWallets = customWallets;
         await user.save();
       }
     }
@@ -414,6 +417,7 @@ router.post('/sync', protect, async (req, res) => {
       subscriptions: currentSubs,
       profilePicture: updatedUser ? updatedUser.profilePicture : 'avatar1',
       customCategories: updatedUser ? updatedUser.customCategories : { income: {}, expense: {} },
+      customWallets: updatedUser ? updatedUser.customWallets : [],
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

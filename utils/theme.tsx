@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { StorageService } from '../services/storage';
 import { TRANSLATIONS, LanguageCode, TranslationDict } from './translations';
-import { setCachedCurrency, setCachedCustomCategories } from './helpers';
+import { setCachedCurrency, setCachedCustomCategories, setCachedCustomWallets } from './helpers';
 
 export const COLORS = {
   light: {
@@ -136,6 +136,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Load custom categories and cache them
       const customCats = await StorageService.getCustomCategories();
       setCachedCustomCategories(customCats.income, customCats.expense);
+
+      // Load custom wallets and cache them
+      const customWallets = await StorageService.getCustomWallets();
+      setCachedCustomWallets(customWallets);
     };
     loadSettings();
   }, [systemScheme]);

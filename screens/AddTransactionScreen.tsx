@@ -20,6 +20,7 @@ import {
   getTodayString,
   formatDateString,
   getMergedCategories,
+  getMergedWallets,
   getCachedCurrencySymbol,
 } from '../utils/helpers';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,7 +41,7 @@ export const AddTransactionScreen: React.FC = () => {
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
-  const [wallet, setWallet] = useState<WalletType>('Cash');
+  const [wallet, setWallet] = useState<string>('Cash');
   const [note, setNote] = useState('');
   const [date, setDate] = useState(getTodayString());
 
@@ -189,7 +190,7 @@ export const AddTransactionScreen: React.FC = () => {
     return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
   };
 
-  const translateWallet = (w: WalletType) => {
+  const translateWallet = (w: string) => {
     return translateWalletHelper(w, language);
   };
 
@@ -307,7 +308,7 @@ export const AddTransactionScreen: React.FC = () => {
           <View style={[styles.fieldSection, { paddingHorizontal: spacing.md }]}>
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.wallet}</Text>
             <View style={styles.walletPicker}>
-              {(['Cash', 'Bank', 'UPI', 'Credit Card', 'Digital Wallet'] as WalletType[]).map(w => {
+              {getMergedWallets().map(w => {
                 const isSelected = wallet === w;
                 return (
                   <TouchableOpacity

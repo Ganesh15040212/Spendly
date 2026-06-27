@@ -1,6 +1,12 @@
 // Client-side Database Schemas and Typings for AsyncStorage & Sync
 import { CategoryConfig } from '../utils/helpers';
 
+export interface CustomWallet {
+  id: string;
+  name: string;
+  type: WalletType;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -12,6 +18,7 @@ export interface User {
     income: Record<string, CategoryConfig>;
     expense: Record<string, CategoryConfig>;
   };
+  customWallets?: CustomWallet[];
 }
 
 export type WalletType = 'Cash' | 'Bank' | 'UPI' | 'Credit Card' | 'Digital Wallet';
@@ -22,7 +29,7 @@ export interface Transaction {
   amount: number;     // Transaction amount (numeric decimal)
   type: 'income' | 'expense'; // Transaction action type
   category: string;   // Category key (e.g. 'Food', 'Salary', etc.)
-  wallet: WalletType; // Wallet source used
+  wallet: string;     // Wallet source used
   note: string;       // Optional user memo
   date: string;       // ISO Date format: YYYY-MM-DD
   createdAt: string;  // Local timestamp creation string

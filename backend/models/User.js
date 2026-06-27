@@ -41,6 +41,10 @@ const UserSchema = new mongoose.Schema(
       type: Object,
       default: { income: {}, expense: {} },
     },
+    customWallets: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,
