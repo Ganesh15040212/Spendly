@@ -1,12 +1,6 @@
 // Client-side Database Schemas and Typings for AsyncStorage & Sync
 import { CategoryConfig } from '../utils/helpers';
 
-export interface CustomWallet {
-  id: string;
-  name: string;
-  type: WalletType;
-}
-
 export interface User {
   id: string;
   name: string;
@@ -18,10 +12,22 @@ export interface User {
     income: Record<string, CategoryConfig>;
     expense: Record<string, CategoryConfig>;
   };
-  customWallets?: CustomWallet[];
 }
 
-export type WalletType = 'Cash' | 'Bank' | 'UPI' | 'Credit Card' | 'Digital Wallet';
+export type WalletType = 
+  | 'UPI'
+  | 'Net Banking'
+  | 'Digital Wallets'
+  | 'Pay Later'
+  | 'Cheque'
+  | 'Credit Card'
+  | 'Debit Card'
+  | 'AutoPay'
+  | 'IMPS'
+  | 'Prepaid Payment Instruments (PPIs)'
+  | 'NEFT/RTGS'
+  | 'EMI'
+  | 'QR';
 
 export interface Transaction {
   _id?: string;       // MongoDB Server-side Object ID (synced)

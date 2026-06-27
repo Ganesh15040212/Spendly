@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -117,14 +118,17 @@ export default function RegisterScreen() {
 
               {/* Logo Section */}
               <View style={styles.logoSection}>
+                <View style={styles.logoCard}>
+                  <Image source={require('../assets/images/logo.jpg')} style={styles.logoImage} />
+                </View>
                 <Text style={[styles.title, { color: colors.text }]}>
                   {t.language === 'hi' ? 'खाता बनाएं' : t.language === 'ta' ? 'கணக்கை உருவாக்கு' : t.language === 'es' ? 'Crear Cuenta' : 'Create Account'}
                 </Text>
-                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                <Text style={[styles.subtitle, { color: colors.textSecondary, textAlign: 'center' }]}>
                   {t.language === 'hi'
                     ? 'Spendly के साथ अपने व्यक्तिगत वित्त का प्रबंधन शुरू करें'
                     : t.language === 'ta'
-                    ? 'Spendly உடன் உங்கள் தனிப்பட்ட நிதிகளை நிர்வகிக்கத் தொடங்குங்கள்'
+                    ? 'Spendly உடன் உங்கள் தனிப்பட்ட நிதிகளை நிர்வகிக்கத் தொடungகள்'
                     : t.language === 'es'
                     ? 'Comience a administrar sus finanzas personales con Spendly'
                     : 'Start managing your personal finances with Spendly'}
@@ -267,7 +271,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoSection: {
-    marginBottom: 24,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  logoCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
+    marginBottom: 12,
+  },
+  logoImage: {
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
   },
   title: {
     fontSize: 26,

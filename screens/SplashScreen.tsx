@@ -1,11 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import { Animated, StyleSheet, Text, View, ActivityIndicator, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../utils/theme';
 import { NotificationService } from '../services/notification';
 import { ApiService } from '../services/api';
 import { StorageService } from '../services/storage';
-import { Ionicons } from '@expo/vector-icons';
 
 export const SplashScreen: React.FC = () => {
   const { colors, spacing } = useTheme();
@@ -25,7 +24,7 @@ export const SplashScreen: React.FC = () => {
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
-        friction: 5,
+        friction: 7,
         tension: 40,
         useNativeDriver: true,
       }),
@@ -34,7 +33,7 @@ export const SplashScreen: React.FC = () => {
     // Perform initialization tasks
     const initApp = async () => {
       try {
-        // 1. Request and schedule notifications (at 8:00 PM)
+        // Request and schedule notifications (at 8:00 PM)
         await NotificationService.scheduleDailyReminder(20, 0);
 
         // 2. Perform a fast API Sync in background (fails silently if offline)
@@ -63,13 +62,9 @@ export const SplashScreen: React.FC = () => {
           },
         ]}
       >
-        <View style={[styles.iconBox, { backgroundColor: colors.primary }]}>
-          <Ionicons name="wallet" size={60} color="#ffffff" />
+        <View style={styles.logoCard}>
+          <Image source={require('../assets/images/logo.jpg')} style={styles.logoImage} />
         </View>
-        <Text style={[styles.title, { color: colors.text }]}>Spendly</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Daily Expense Tracker
-        </Text>
       </Animated.View>
 
       <View style={[styles.loaderContainer, { bottom: spacing.xl }]}>
@@ -92,28 +87,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconBox: {
-    width: 110,
-    height: 110,
+  logoCard: {
     borderRadius: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
     elevation: 8,
   },
-  title: {
-    fontSize: 34,
-    fontWeight: '900',
-    marginTop: 20,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginTop: 4,
+  logoImage: {
+    width: 250,
+    height: 250,
+    resizeMode: 'contain',
   },
   loaderContainer: {
     position: 'absolute',

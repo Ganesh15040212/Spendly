@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Transaction, Budget, Goal, Subscription, User, CustomWallet } from '../database/schema';
+import { Transaction, Budget, Goal, Subscription, User } from '../database/schema';
 import { CategoryConfig } from '../utils/helpers';
 
 const KEYS = {
@@ -14,7 +14,6 @@ const KEYS = {
   CURRENCY_SYMBOL: '@spendly_currency_symbol',
   PROFILE_PICTURE: '@spendly_profile_picture',
   CUSTOM_CATEGORIES: '@spendly_custom_categories',
-  CUSTOM_WALLETS: '@spendly_custom_wallets',
 };
 
 export const generateUUID = (): string => {
@@ -276,44 +275,6 @@ export const StorageService = {
     }
   },
 
-  getCustomWallets: async (): Promise<CustomWallet[]> => {
-    try {
-      const data = await AsyncStorage.getItem(KEYS.CUSTOM_WALLETS);
-      return data ? JSON.parse(data) : [];
-    } catch (e) {
-      return [];
-    }
-  },
-
-  addCustomWallet: async (walletData: Omit<CustomWallet, 'id'>): Promise<CustomWallet> => {
-    const wallets = await StorageService.getCustomWallets();
-    const newWallet: CustomWallet = {
-      ...walletData,
-      id: generateUUID(),
-    };
-    wallets.push(newWallet);
-    await AsyncStorage.setItem(KEYS.CUSTOM_WALLETS, JSON.stringify(wallets));
-    return newWallet;
-  },
-
-  saveCustomWallets: async (wallets: CustomWallet[]): Promise<void> => {
-    try {
-      await AsyncStorage.setItem(KEYS.CUSTOM_WALLETS, JSON.stringify(wallets));
-    } catch (e) {
-      console.error('Failed to save custom wallets list', e);
-    }
-  },
-
-  deleteCustomWallet: async (id: string): Promise<void> => {
-    try {
-      const wallets = await StorageService.getCustomWallets();
-      const filtered = wallets.filter(w => w.id !== id);
-      await AsyncStorage.setItem(KEYS.CUSTOM_WALLETS, JSON.stringify(filtered));
-    } catch (e) {
-      console.error('Failed to delete custom wallet', e);
-    }
-  },
-
   // Clear all configurations
   clearAll: async (): Promise<void> => {
     try {
@@ -325,7 +286,6 @@ export const StorageService = {
       await AsyncStorage.removeItem(KEYS.GOALS);
       await AsyncStorage.removeItem(KEYS.SUBSCRIPTIONS);
       await AsyncStorage.removeItem(KEYS.CUSTOM_CATEGORIES);
-      await AsyncStorage.removeItem(KEYS.CUSTOM_WALLETS);
     } catch (e) {
       console.error('Failed to clear storage', e);
     }

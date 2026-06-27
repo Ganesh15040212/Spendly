@@ -17,7 +17,7 @@ import { useTheme } from '../utils/theme';
 import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
 import { Transaction, User, WalletType } from '../database/schema';
-import { getTodayString, formatDateString, formatCurrency, getCustomWalletsCache } from '../utils/helpers';
+import { getTodayString, formatDateString, formatCurrency } from '../utils/helpers';
 import { BalanceCard } from '../components/BalanceCard';
 import { TransactionItem } from '../components/TransactionItem';
 import { EmptyState } from '../components/EmptyState';
@@ -46,11 +46,19 @@ export const DashboardScreen: React.FC = () => {
 
   // Wallet-wise Balances
   const [wallets, setWallets] = useState<Record<string, number>>({
-    Cash: 0,
-    Bank: 0,
-    UPI: 0,
+    'UPI': 0,
+    'Net Banking': 0,
+    'Digital Wallets': 0,
+    'Pay Later': 0,
+    'Cheque': 0,
     'Credit Card': 0,
-    'Digital Wallet': 0,
+    'Debit Card': 0,
+    'AutoPay': 0,
+    'IMPS': 0,
+    'Prepaid Payment Instruments (PPIs)': 0,
+    'NEFT/RTGS': 0,
+    'EMI': 0,
+    'QR': 0,
   });
 
   // Health Score & AI Insights
@@ -85,29 +93,25 @@ export const DashboardScreen: React.FC = () => {
       let totalInc = 0;
       let totalExp = 0;
       
-      const tempWallets: Record<string, number> = {};
-      const customWallets = getCustomWalletsCache();
-      if (customWallets.length > 0) {
-        customWallets.forEach(w => {
-          tempWallets[w.name] = 0;
-        });
-        const firstBank = customWallets.find(w => w.type === 'Bank');
-        if (firstBank) {
-          tempWallets[firstBank.name] = balance;
-        } else if (customWallets[0]) {
-          tempWallets[customWallets[0].name] = balance;
-        }
-      } else {
-        tempWallets['Cash'] = 0;
-        tempWallets['Bank'] = balance;
-        tempWallets['UPI'] = 0;
-        tempWallets['Credit Card'] = 0;
-        tempWallets['Digital Wallet'] = 0;
-      }
+      const tempWallets: Record<string, number> = {
+        'UPI': balance, // Default: main opening balance goes to UPI
+        'Net Banking': 0,
+        'Digital Wallets': 0,
+        'Pay Later': 0,
+        'Cheque': 0,
+        'Credit Card': 0,
+        'Debit Card': 0,
+        'AutoPay': 0,
+        'IMPS': 0,
+        'Prepaid Payment Instruments (PPIs)': 0,
+        'NEFT/RTGS': 0,
+        'EMI': 0,
+        'QR': 0,
+      };
 
       allTx.forEach(tx => {
         const amt = tx.amount;
-        const wType = tx.wallet || 'Cash';
+        const wType = tx.wallet || 'UPI';
 
         if (tx.type === 'income') {
           totalInc += amt;
@@ -360,30 +364,49 @@ export const DashboardScreen: React.FC = () => {
           >
             {Object.keys(wallets).map(walletName => {
               const balance = wallets[walletName];
-              
-              // Resolve wallet base type for color and icon
-              const customWallets = getCustomWalletsCache();
-              const customWallet = customWallets.find(w => w.name === walletName);
-              const type = customWallet ? customWallet.type : walletName;
 
               let icon = 'card-outline';
               let walletColor = colors.primary;
 
-              if (type === 'Cash') {
-                icon = 'cash-outline';
-                walletColor = '#10b981';
-              } else if (type === 'Bank') {
-                icon = 'business-outline';
-                walletColor = '#3b82f6';
-              } else if (type === 'UPI') {
+              if (walletName === 'UPI') {
                 icon = 'phone-portrait-outline';
                 walletColor = '#8b5cf6';
-              } else if (type === 'Credit Card') {
-                icon = 'card-outline';
-                walletColor = '#ec4899';
-              } else if (type === 'Digital Wallet') {
+              } else if (walletName === 'Net Banking') {
+                icon = 'globe-outline';
+                walletColor = '#3b82f6';
+              } else if (walletName === 'Digital Wallets') {
                 icon = 'wallet-outline';
                 walletColor = '#f59e0b';
+              } else if (walletName === 'Pay Later') {
+                icon = 'time-outline';
+                walletColor = '#06b6d4';
+              } else if (walletName === 'Cheque') {
+                icon = 'document-text-outline';
+                walletColor = '#64748b';
+              } else if (walletName === 'Credit Card') {
+                icon = 'card-outline';
+                walletColor = '#ec4899';
+              } else if (walletName === 'Debit Card') {
+                icon = 'card-outline';
+                walletColor = '#10b981';
+              } else if (walletName === 'AutoPay') {
+                icon = 'repeat-outline';
+                walletColor = '#6366f1';
+              } else if (walletName === 'IMPS') {
+                icon = 'flash-outline';
+                walletColor = '#fb7185';
+              } else if (walletName === 'Prepaid Payment Instruments (PPIs)') {
+                icon = 'gift-outline';
+                walletColor = '#a855f7';
+              } else if (walletName === 'NEFT/RTGS') {
+                icon = 'arrow-forward-outline';
+                walletColor = '#14b8a6';
+              } else if (walletName === 'EMI') {
+                icon = 'calculator-outline';
+                walletColor = '#eab308';
+              } else if (walletName === 'QR') {
+                icon = 'qr-code-outline';
+                walletColor = '#f97316';
               }
 
               return (

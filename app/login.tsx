@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
   Keyboard,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -90,13 +91,9 @@ export default function LoginScreen() {
           <View style={[styles.container, { paddingHorizontal: spacing.lg }]}>
             {/* Logo Header */}
             <View style={styles.logoSection}>
-              <View style={[styles.logoIcon, { backgroundColor: colors.primary }]}>
-                <Ionicons name="wallet" size={40} color="#ffffff" />
+              <View style={styles.logoCard}>
+                <Image source={require('../assets/images/logo.jpg')} style={styles.logoImage} />
               </View>
-              <Text style={[styles.title, { color: colors.text }]}>{t.appName}</Text>
-              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                SmartExpense AI Dashboard
-              </Text>
             </View>
 
             {/* Error Banner */}
@@ -198,29 +195,23 @@ const styles = StyleSheet.create({
   },
   logoSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
   },
-  logoIcon: {
-    width: 80,
-    height: 80,
+  logoCard: {
     borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    elevation: 3,
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 4,
+    marginBottom: 10,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginTop: 4,
+  logoImage: {
+    width: 140,
+    height: 140,
+    resizeMode: 'contain',
   },
   errorBox: {
     flexDirection: 'row',

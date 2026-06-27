@@ -41,7 +41,7 @@ export const AddTransactionScreen: React.FC = () => {
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
-  const [wallet, setWallet] = useState<string>('Cash');
+  const [wallet, setWallet] = useState<string>('UPI');
   const [note, setNote] = useState('');
   const [date, setDate] = useState(getTodayString());
 
@@ -59,7 +59,7 @@ export const AddTransactionScreen: React.FC = () => {
           setType(found.type);
           setAmount(found.amount.toString());
           setCategory(found.category);
-          setWallet(found.wallet || 'Cash');
+          setWallet(found.wallet || 'UPI');
           setNote(found.note);
           setDate(found.date);
         }

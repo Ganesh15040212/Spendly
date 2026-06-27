@@ -6,7 +6,6 @@ let cachedLocale = 'en-IN';
 
 let cachedCustomIncomeCategories: Record<string, CategoryConfig> = {};
 let cachedCustomExpenseCategories: Record<string, CategoryConfig> = {};
-let cachedCustomWallets: any[] = [];
 
 export const hslToHex = (h: number, s: number, l: number): string => {
   l /= 100;
@@ -19,17 +18,22 @@ export const hslToHex = (h: number, s: number, l: number): string => {
   return `#${f(0)}${f(8)}${f(4)}`;
 };
 
-export const setCachedCustomWallets = (wallets: any[]) => {
-  cachedCustomWallets = wallets || [];
-};
-
-export const getCustomWalletsCache = () => cachedCustomWallets;
-
 export const getMergedWallets = (): string[] => {
-  if (cachedCustomWallets.length > 0) {
-    return cachedCustomWallets.map(w => w.name);
-  }
-  return ['Cash', 'Bank', 'UPI', 'Credit Card', 'Digital Wallet'];
+  return [
+    'UPI',
+    'Net Banking',
+    'Digital Wallets',
+    'Pay Later',
+    'Cheque',
+    'Credit Card',
+    'Debit Card',
+    'AutoPay',
+    'IMPS',
+    'Prepaid Payment Instruments (PPIs)',
+    'NEFT/RTGS',
+    'EMI',
+    'QR'
+  ];
 };
 
 export const setCachedCustomCategories = (

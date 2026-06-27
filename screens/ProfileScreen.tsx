@@ -19,8 +19,8 @@ import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { setCachedCustomCategories, getMergedCategories, setCachedCustomWallets, hslToHex } from '../utils/helpers';
-import { CustomWallet, WalletType } from '../database/schema';
+import { setCachedCustomCategories, getMergedCategories, hslToHex } from '../utils/helpers';
+import { WalletType } from '../database/schema';
 
 // 6 Premium Avatar Icon configurations
 const AVATARS = [
@@ -107,11 +107,6 @@ export const ProfileScreen: React.FC = () => {
   // Custom Icon Selection states
   const [customIconModalVisible, setCustomIconModalVisible] = useState(false);
 
-  // Custom Wallet states
-  const [customWalletsList, setCustomWalletsList] = useState<CustomWallet[]>([]);
-  const [walletNameInput, setWalletNameInput] = useState('');
-  const [walletTypeInput, setWalletTypeInput] = useState<WalletType>('Bank');
-
   // Load initial settings from storage
   useEffect(() => {
     const loadSettings = async () => {
@@ -125,10 +120,6 @@ export const ProfileScreen: React.FC = () => {
         setSelectedAvatar(profilePicture);
         setTempThemeMode(themeMode);
         setTempCurrency(currency);
-
-        const wallets = await StorageService.getCustomWallets();
-        setCustomWalletsList(wallets);
-        setCachedCustomWallets(wallets);
       } catch (err) {
         console.error('Failed to load settings', err);
       } finally {
@@ -176,59 +167,6 @@ export const ProfileScreen: React.FC = () => {
     const hexColor = hslToHex(selectedHue, 90, selectedLightness);
     setCatColor(hexColor);
     setCustomColorModalVisible(false);
-  };
-
-  const handleAddWallet = async () => {
-    const name = walletNameInput.trim();
-    if (!name) {
-      Alert.alert('Error', 'Please enter a wallet name');
-      return;
-    }
-
-    // Check if name is unique
-    const exists = customWalletsList.some(w => w.name.toLowerCase() === name.toLowerCase()) || 
-                   ['Cash', 'Bank', 'UPI', 'Credit Card', 'Digital Wallet'].some(w => w.toLowerCase() === name.toLowerCase());
-    
-    if (exists) {
-      Alert.alert('Error', `A wallet named "${name}" already exists.`);
-      return;
-    }
-
-    try {
-      const newWallet = await StorageService.addCustomWallet({
-        name,
-        type: walletTypeInput
-      });
-
-      const updatedList = [...customWalletsList, newWallet];
-      setCustomWalletsList(updatedList);
-      setCachedCustomWallets(updatedList);
-
-      setWalletNameInput('');
-      
-      // Trigger sync
-      ApiService.syncData();
-      
-      Alert.alert('Success', `Wallet "${name}" added.`);
-    } catch (e) {
-      console.error(e);
-      Alert.alert('Error', 'Failed to save custom wallet.');
-    }
-  };
-
-  const handleDeleteWallet = async (id: string) => {
-    try {
-      await StorageService.deleteCustomWallet(id);
-      const filtered = customWalletsList.filter(w => w.id !== id);
-      setCustomWalletsList(filtered);
-      setCachedCustomWallets(filtered);
-
-      // Trigger sync
-      ApiService.syncData();
-    } catch (e) {
-      console.error(e);
-      Alert.alert('Error', 'Failed to delete wallet.');
-    }
   };
 
   const handleLogout = () => {
@@ -621,112 +559,6 @@ export const ProfileScreen: React.FC = () => {
               {language === 'ta' ? 'வகையைச் சேமி' : language === 'hi' ? 'श्रेणी सहेजें' : language === 'es' ? 'Guardar Categoría' : 'Save Category'}
             </Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Custom Wallets Header */}
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginHorizontal: spacing.md, marginTop: spacing.lg }]}>
-          {language === 'ta' ? 'தனிப்பயன் பணப்பைகள்' : language === 'hi' ? 'कस्टम वॉलेट' : language === 'es' ? 'Billeteras Personalizadas' : 'Custom Wallets'}
-        </Text>
-
-        <View style={[styles.preferencesContainer, { backgroundColor: colors.card, marginHorizontal: spacing.md, padding: 16 }, shadows]}>
-          <Text style={[styles.prefLabel, { color: colors.text, marginBottom: 12 }]}>
-            {language === 'ta' ? 'புதிய பணப்பையைச் சேர்க்கவும்' : language === 'hi' ? 'नया वॉलेट जोड़ें' : language === 'es' ? 'Agregar Nueva Billetera' : 'Add New Wallet'}
-          </Text>
-
-          {/* Wallet Name Input */}
-          <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.background }]}>
-            <TextInput
-              style={[styles.inputField, { color: colors.text }]}
-              placeholder={language === 'ta' ? 'பணப்பை பெயர் (எ.கா. எஸ்பிஐ வங்கி)' : language === 'hi' ? 'वॉलेट का नाम (जैसे SBI बैंक)' : language === 'es' ? 'Nombre (ej. Banco SBI)' : 'Wallet Name (e.g. SBI Bank)'}
-              placeholderTextColor={colors.textSecondary + '70'}
-              value={walletNameInput}
-              onChangeText={setWalletNameInput}
-            />
-          </View>
-
-          {/* Wallet Base Type Selector */}
-          <View style={{ marginBottom: 16 }}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginBottom: 8 }]}>
-              {language === 'ta' ? 'பணப்பை வகை' : language === 'hi' ? 'वॉलेट का प्रकार' : language === 'es' ? 'Tipo de Billetera' : 'Wallet Base Type'}
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-              {(['Cash', 'Bank', 'UPI', 'Credit Card', 'Digital Wallet'] as WalletType[]).map(typeOpt => {
-                const isActive = walletTypeInput === typeOpt;
-                return (
-                  <TouchableOpacity
-                    key={typeOpt}
-                    style={[
-                      styles.selectorBtn,
-                      { borderColor: colors.border, backgroundColor: colors.background },
-                      isActive && { backgroundColor: colors.primary, borderColor: colors.primary },
-                    ]}
-                    onPress={() => setWalletTypeInput(typeOpt)}
-                  >
-                    <Text style={{ color: isActive ? '#ffffff' : colors.text, fontSize: 13, fontWeight: 'bold' }}>
-                      {typeOpt}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-
-          {/* Add Wallet Button */}
-          <TouchableOpacity
-            style={[styles.saveBtn, { backgroundColor: colors.primary, marginTop: 10, marginBottom: 20 }, shadows]}
-            onPress={handleAddWallet}
-          >
-            <Text style={styles.saveBtnText}>
-              {language === 'ta' ? 'பணப்பையைச் சேர்' : language === 'hi' ? 'वॉलेट जोड़ें' : language === 'es' ? 'Agregar Billetera' : 'Add Wallet'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Current Wallets List */}
-          {customWalletsList.length > 0 ? (
-            <View style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 16 }}>
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginBottom: 12 }]}>
-                {language === 'ta' ? 'தற்போதுள்ள பணப்பைகள்' : language === 'hi' ? 'मौजूदा वॉलेट' : language === 'es' ? 'Billeteras Existentes' : 'Your Custom Wallets'}
-              </Text>
-              {customWalletsList.map(w => (
-                <View
-                  key={w.id}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingVertical: 10,
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.border + '50',
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Ionicons
-                      name={
-                        w.type === 'Cash'
-                          ? 'cash-outline'
-                          : w.type === 'Bank'
-                          ? 'business-outline'
-                          : w.type === 'UPI'
-                          ? 'phone-portrait-outline'
-                          : w.type === 'Credit Card'
-                          ? 'card-outline'
-                          : 'wallet-outline'
-                      }
-                      size={20}
-                      color={colors.primary}
-                    />
-                    <View>
-                      <Text style={{ color: colors.text, fontWeight: '600', fontSize: 14 }}>{w.name}</Text>
-                      <Text style={{ color: colors.textSecondary, fontSize: 11 }}>{w.type}</Text>
-                    </View>
-                  </View>
-                  <TouchableOpacity onPress={() => handleDeleteWallet(w.id)}>
-                    <Ionicons name="trash-outline" size={18} color={colors.expense} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          ) : null}
         </View>
 
         {/* Save, Reset and Logout Actions */}
