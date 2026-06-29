@@ -6,7 +6,10 @@ import { setCachedCurrency, setCachedCustomCategories } from '../utils/helpers';
 // Define your production Render backend API URL here
 const PROD_API_URL = 'https://spendly-632z.onrender.com/api';
 
-// Automatically detect host IP based on emulator platform
+// Point directly to production Render server by default (works everywhere).
+// To test a local server, uncomment the local IP block below.
+const API_URL = PROD_API_URL;
+/*
 const API_URL = !__DEV__
   ? PROD_API_URL
   : Platform.select({
@@ -14,6 +17,7 @@ const API_URL = !__DEV__
       ios: 'http://192.168.21.250:5000/api',
       default: 'http://localhost:5000/api',
     }) || 'http://localhost:5000/api';
+*/
 
 const fetchWithTimeoutAndRetry = async (
   url: string,
