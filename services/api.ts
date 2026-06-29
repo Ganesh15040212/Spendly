@@ -10,8 +10,8 @@ const PROD_API_URL = 'https://spendly-632z.onrender.com/api';
 const API_URL = !__DEV__
   ? PROD_API_URL
   : Platform.select({
-      android: 'http://192.168.21.250:5000/api',
-      ios: 'http://192.168.21.250:5000/api',
+      android: 'http://192.168.21.88:5000/api',
+      ios: 'http://192.168.21.88:5000/api',
       default: 'http://localhost:5000/api',
     }) || 'http://localhost:5000/api';
 
