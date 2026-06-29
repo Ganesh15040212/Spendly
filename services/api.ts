@@ -6,14 +6,8 @@ import { setCachedCurrency, setCachedCustomCategories } from '../utils/helpers';
 // Define your production Render backend API URL here
 const PROD_API_URL = 'https://spendly-632z.onrender.com/api';
 
-// Automatically detect host IP based on emulator platform
-const API_URL = !__DEV__
-  ? PROD_API_URL
-  : Platform.select({
-      android: 'http://192.168.21.88:5000/api',
-      ios: 'http://192.168.21.88:5000/api',
-      default: 'http://localhost:5000/api',
-    }) || 'http://localhost:5000/api';
+// Set API URL to production
+const API_URL = PROD_API_URL;
 
 export const ApiService = {
   // 1. User Registration
