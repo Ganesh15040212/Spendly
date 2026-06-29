@@ -278,8 +278,28 @@ router.delete('/subscriptions/:id', protect, async (req, res) => {
 
 router.post('/sync', protect, async (req, res) => {
   try {
-    const { transactions, budgets, goals, subscriptions, openingBalance, profilePicture, customCategories } = req.body;
+    const { transactions, budgets, goals, subscriptions, openingBalance, profilePicture, customCategories, initialPull } = req.body;
     const userId = req.user.id;
+
+    if (initialPull) {
+      const config = await UserConfig.findOne({ user: userId }) || { openingBalance: 0 };
+      const currentTransactions = await Transaction.find({ user: userId }).sort({ date: -1 });
+      const currentBudgets = await Budget.find({ user: userId });
+      const currentGoals = await Goal.find({ user: userId });
+      const currentSubs = await Subscription.find({ user: userId });
+      const updatedUser = await User.findById(userId);
+
+      return res.json({
+        success: true,
+        config,
+        transactions: currentTransactions,
+        budgets: currentBudgets,
+        goals: currentGoals,
+        subscriptions: currentSubs,
+        profilePicture: updatedUser ? updatedUser.profilePicture : null,
+        customCategories: updatedUser ? updatedUser.customCategories : null,
+      });
+    }
 
     // Update User Profile details if sent
     if (profilePicture || customCategories) {

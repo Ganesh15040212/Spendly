@@ -65,8 +65,8 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (result.success) {
-      // Sync local storage in background
-      ApiService.syncData();
+      // Sync local storage in background (pull initial data)
+      ApiService.syncData(true);
       router.replace('/(tabs)');
     } else {
       setError(

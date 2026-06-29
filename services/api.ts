@@ -126,7 +126,7 @@ export const ApiService = {
   },
 
   // 3. Sync all local data with backend server
-  syncData: async (): Promise<{ success: boolean; message: string }> => {
+  syncData: async (initialPull = false): Promise<{ success: boolean; message: string }> => {
     try {
       const token = await StorageService.getAuthToken();
       if (!token) return { success: false, message: 'User not logged in.' };
@@ -153,6 +153,7 @@ export const ApiService = {
           openingBalance,
           profilePicture,
           customCategories,
+          initialPull,
         }),
       });
 
