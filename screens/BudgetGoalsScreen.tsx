@@ -20,6 +20,7 @@ import { useFocusEffect } from 'expo-router';
 import { useTheme } from '../utils/theme';
 import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
+import { NotificationService } from '../services/notification';
 import { Budget, Goal } from '../database/schema';
 import { formatCurrency, getTodayString, formatDateString, getStartAndEndDates, getMergedCategories, getCachedCurrencySymbol } from '../utils/helpers';
 import { translateCategory } from '../utils/translations';
@@ -151,6 +152,13 @@ export const BudgetGoalsScreen: React.FC = () => {
       deadline: goalDeadline,
     });
 
+    if (current >= target) {
+      await NotificationService.sendImmediateNotification(
+        `🎉 Savings Goal Reached!`,
+        `Congratulations! You achieved your savings target of ${formatCurrency(target)} for "${goalName.trim()}"!`
+      );
+    }
+
     setShowGoalModal(false);
     setGoalName('');
     setGoalTarget('');
@@ -169,6 +177,22 @@ export const BudgetGoalsScreen: React.FC = () => {
     await StorageService.updateGoal(showFundModal.id || showFundModal._id || '', {
       currentAmount: Math.min(newCurrent, showFundModal.targetAmount),
     });
+
+    // Check goal achieved alerts
+    const target = showFundModal.targetAmount;
+    const previousCurrent = showFundModal.currentAmount || 0;
+    
+    if (newCurrent >= target && previousCurrent < target) {
+      await NotificationService.sendImmediateNotification(
+        `🎉 Savings Goal Reached!`,
+        `Congratulations! You achieved your savings target of ${formatCurrency(target)} for "${showFundModal.name}"!`
+      );
+    } else if (newCurrent >= target * 0.8 && previousCurrent < target * 0.8) {
+      await NotificationService.sendImmediateNotification(
+        `💪 80% Savings Reached!`,
+        `You're almost there! You saved ${formatCurrency(newCurrent)} / ${formatCurrency(target)} for "${showFundModal.name}".`
+      );
+    }
 
     setShowFundModal(null);
     setFundAmount('');

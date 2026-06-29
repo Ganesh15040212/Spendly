@@ -5,10 +5,15 @@ import { useTheme } from '../utils/theme';
 import { NotificationService } from '../services/notification';
 import { ApiService } from '../services/api';
 import { StorageService } from '../services/storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const SplashScreen: React.FC = () => {
   const { colors, spacing } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  // Dynamically calculate bottom offset to position loader text above navigation bar
+  const bottomOffset = (insets.bottom > 0 ? insets.bottom : 16) + 30;
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -67,7 +72,7 @@ export const SplashScreen: React.FC = () => {
         </View>
       </Animated.View>
 
-      <View style={[styles.loaderContainer, { bottom: spacing.xl }]}>
+      <View style={[styles.loaderContainer, { bottom: bottomOffset }]}>
         <ActivityIndicator size="small" color={colors.primary} />
         <Text style={[styles.loaderText, { color: colors.textSecondary, marginTop: spacing.sm }]}>
           Initializing storage...

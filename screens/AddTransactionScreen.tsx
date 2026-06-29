@@ -16,6 +16,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '../utils/theme';
 import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
+import { NotificationService } from '../services/notification';
 import { WalletType } from '../database/schema';
 import {
   getTodayString,
@@ -153,6 +154,14 @@ export const AddTransactionScreen: React.FC = () => {
       } else {
         await StorageService.addTransaction(payload);
       }
+      
+      // Trigger background alerts checks for budget limits & overdrafts
+      const savedTx = {
+        id: isEditMode ? transactionId : 'alert_check_' + Date.now(),
+        ...payload,
+        createdAt: new Date().toISOString(),
+      };
+      NotificationService.checkTransactionAlerts(savedTx);
       
       // Sync in background
       ApiService.syncData();

@@ -2,9 +2,15 @@ import { Tabs } from 'expo-router';
 import { useTheme } from '../../utils/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  // Calculate dynamic bottom padding and height to prevent overlap on notch screens and normal navigation bars
+  const bottomPadding = insets.bottom > 0 ? insets.bottom : 8;
+  const tabHeight = 60 + bottomPadding;
 
   return (
     <Tabs
@@ -15,9 +21,9 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopColor: colors.border,
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
-          paddingTop: 10,
+          height: tabHeight,
+          paddingBottom: bottomPadding,
+          paddingTop: 8,
           borderTopWidth: 1,
           elevation: 8,
           shadowColor: '#000',
@@ -28,6 +34,7 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          marginBottom: 4,
         },
       }}
     >
