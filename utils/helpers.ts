@@ -156,7 +156,7 @@ export const getMergedCategories = (type: 'income' | 'expense'): Record<string, 
 };
 
 // Date Range Filter Helpers
-export const getStartAndEndDates = (filterType: 'today' | 'weekly' | 'monthly' | 'all') => {
+export const getStartAndEndDates = (filterType: 'today' | 'weekly' | 'monthly' | 'yearly' | 'all') => {
   const today = new Date();
   
   const formatDate = (d: Date) => {
@@ -186,6 +186,12 @@ export const getStartAndEndDates = (filterType: 'today' | 'weekly' | 'monthly' |
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     return { startDate: formatDate(startOfMonth), endDate: formatDate(endOfMonth) };
+  }
+
+  if (filterType === 'yearly') {
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    const endOfYear = new Date(today.getFullYear(), 11, 31);
+    return { startDate: formatDate(startOfYear), endDate: formatDate(endOfYear) };
   }
 
   return { startDate: '', endDate: '' };

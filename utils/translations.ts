@@ -75,6 +75,7 @@ export interface TranslationDict {
   filterToday: string;
   filterWeekly: string;
   filterMonthly: string;
+  filterYearly: string;
   exportPdf: string;
   exportCsv: string;
   noHistoryFound: string;
@@ -240,6 +241,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     filterToday: 'Today',
     filterWeekly: 'Weekly',
     filterMonthly: 'Monthly',
+    filterYearly: 'Yearly',
     exportPdf: 'Export PDF',
     exportCsv: 'Export CSV',
     noHistoryFound: 'No transactions found matching filters.',
@@ -399,6 +401,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     filterToday: 'आज',
     filterWeekly: 'साप्ताहिक',
     filterMonthly: 'मासिक',
+    filterYearly: 'वार्षिक',
     exportPdf: 'पीडीएफ एक्सपोर्ट',
     exportCsv: 'सीएसवी एक्सपोर्ट',
     noHistoryFound: 'कोई लेन-देन नहीं मिला।',
@@ -558,6 +561,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     filterToday: 'இன்று',
     filterWeekly: 'வாரம்',
     filterMonthly: 'மாதம்',
+    filterYearly: 'வருடாந்திர',
     exportPdf: 'PDF ஏற்றுமதி',
     exportCsv: 'CSV ஏற்றுமதி',
     noHistoryFound: 'பரிவர்த்தனைகள் எதுவும் இல்லை.',
@@ -717,6 +721,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     filterToday: 'Hoy',
     filterWeekly: 'Semanal',
     filterMonthly: 'Mensual',
+    filterYearly: 'Anual',
     exportPdf: 'Exportar PDF',
     exportCsv: 'Exportar CSV',
     noHistoryFound: 'No se encontraron transacciones.',
