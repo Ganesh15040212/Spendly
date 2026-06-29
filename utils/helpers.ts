@@ -20,6 +20,7 @@ export const hslToHex = (h: number, s: number, l: number): string => {
 
 export const getMergedWallets = (): string[] => {
   return [
+    'Cash',
     'UPI',
     'Net Banking',
     'Digital Wallets',

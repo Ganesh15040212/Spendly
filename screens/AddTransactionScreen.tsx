@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -41,11 +42,14 @@ export const AddTransactionScreen: React.FC = () => {
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
-  const [wallet, setWallet] = useState<string>('UPI');
+  const [wallet, setWallet] = useState<string>('Cash');
   const [note, setNote] = useState('');
   const [date, setDate] = useState(getTodayString());
 
-  // UI State
+  // Form States & Params
+  const { width: screenWidth } = Dimensions.get('window');
+  const gridGap = 10;
+  const cardWidth = (screenWidth - spacing.md * 2 - (3 * gridGap)) / 4;
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [error, setError] = useState('');
 
@@ -59,7 +63,7 @@ export const AddTransactionScreen: React.FC = () => {
           setType(found.type);
           setAmount(found.amount.toString());
           setCategory(found.category);
-          setWallet(found.wallet || 'UPI');
+          setWallet(found.wallet || 'Cash');
           setNote(found.note);
           setDate(found.date);
         }
@@ -366,14 +370,19 @@ export const AddTransactionScreen: React.FC = () => {
           <View style={[styles.fieldSection, { paddingHorizontal: spacing.md }]}>
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.category}</Text>
             <View style={styles.categoryGrid}>
-              {Object.values(categoryList).map(cat => {
+              {Object.values(categoryList).map((cat, index) => {
                 const isSelected = category === cat.name;
+                const isFourth = (index + 1) % 4 === 0;
                 return (
                   <TouchableOpacity
                     key={cat.name}
                     style={[
                       styles.categoryCard,
-                      { backgroundColor: colors.card },
+                      {
+                        backgroundColor: colors.card,
+                        width: cardWidth,
+                        marginRight: isFourth ? 0 : gridGap,
+                      },
                       isSelected && { borderColor: cat.color, borderWidth: 2 },
                     ]}
                     onPress={() => setCategory(cat.name)}
@@ -555,10 +564,8 @@ const styles = StyleSheet.create({
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
   },
   categoryCard: {
-    width: '23%',
     aspectRatio: 1,
     borderRadius: 16,
     justifyContent: 'center',
@@ -571,6 +578,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+    marginBottom: 10,
   },
   categoryIconCircle: {
     width: 38,

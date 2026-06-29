@@ -15,6 +15,7 @@ export interface User {
 }
 
 export type WalletType = 
+  | 'Cash'
   | 'UPI'
   | 'Net Banking'
   | 'Digital Wallets'

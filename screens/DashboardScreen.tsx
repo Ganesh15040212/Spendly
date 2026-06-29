@@ -46,6 +46,7 @@ export const DashboardScreen: React.FC = () => {
 
   // Wallet-wise Balances
   const [wallets, setWallets] = useState<Record<string, number>>({
+    'Cash': 0,
     'UPI': 0,
     'Net Banking': 0,
     'Digital Wallets': 0,
@@ -94,7 +95,8 @@ export const DashboardScreen: React.FC = () => {
       let totalExp = 0;
       
       const tempWallets: Record<string, number> = {
-        'UPI': balance, // Default: main opening balance goes to UPI
+        'Cash': balance, // Default: main opening balance goes to Cash
+        'UPI': 0,
         'Net Banking': 0,
         'Digital Wallets': 0,
         'Pay Later': 0,
@@ -111,7 +113,7 @@ export const DashboardScreen: React.FC = () => {
 
       allTx.forEach(tx => {
         const amt = tx.amount;
-        const wType = tx.wallet || 'UPI';
+        const wType = tx.wallet || 'Cash';
 
         if (tx.type === 'income') {
           totalInc += amt;
@@ -368,7 +370,10 @@ export const DashboardScreen: React.FC = () => {
               let icon = 'card-outline';
               let walletColor = colors.primary;
 
-              if (walletName === 'UPI') {
+              if (walletName === 'Cash') {
+                icon = 'cash-outline';
+                walletColor = '#10b981';
+              } else if (walletName === 'UPI') {
                 icon = 'phone-portrait-outline';
                 walletColor = '#8b5cf6';
               } else if (walletName === 'Net Banking') {

@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Image,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -25,14 +26,14 @@ const ConditionalWrapper = ({ children }: { children: React.ReactNode }) => {
     return <>{children}</>;
   }
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
       {children}
     </TouchableWithoutFeedback>
   );
 };
 
 export default function LoginScreen() {
-  const { colors, spacing, sizes, shadows, t } = useTheme();
+  const { colors, spacing, shadows, t } = useTheme();
   const router = useRouter();
 
   // Form states
@@ -88,94 +89,94 @@ export default function LoginScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardView}
         >
-          <View style={[styles.container, { paddingHorizontal: spacing.lg }]}>
-            {/* Logo Header */}
-            <View style={styles.logoSection}>
-              <View style={styles.logoCard}>
-                <Image source={require('../assets/images/logo.jpg')} style={styles.logoImage} />
+          <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+            <View style={[styles.container, { paddingHorizontal: spacing.lg }]}>
+              {/* Logo Header */}
+              <View style={styles.logoSection}>
+                <View style={styles.logoCard}>
+                  <Image source={require('../assets/images/logo.jpg')} style={styles.logoImage} />
+                </View>
               </View>
-            </View>
 
-            {/* Error Banner */}
-            {error ? (
-              <View style={[styles.errorBox, { backgroundColor: colors.expenseLight }]}>
-                <Ionicons name="alert-circle" size={18} color={colors.expense} />
-                <Text style={[styles.errorText, { color: colors.expense }]}>{error}</Text>
-              </View>
-            ) : null}
+              {/* Error Banner */}
+              {error ? (
+                <View style={[styles.errorBox, { backgroundColor: colors.expenseLight }]}>
+                  <Ionicons name="alert-circle" size={18} color={colors.expense} />
+                  <Text style={[styles.errorText, { color: colors.expense }]}>{error}</Text>
+                </View>
+              ) : null}
 
-            {/* Email Field */}
-            <View style={styles.formField}>
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.email.toUpperCase()}</Text>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.card }]}>
-                <Ionicons name="mail-outline" size={18} color={colors.textSecondary} style={{ marginRight: 10 }} />
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="e.g. user@spendly.com"
-                  placeholderTextColor={colors.textSecondary + '70'}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={email}
-                  onChangeText={setEmail}
-                />
-              </View>
-            </View>
-
-            {/* Password Field */}
-            <View style={styles.formField}>
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.password.toUpperCase()}</Text>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.card }]}>
-                <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} style={{ marginRight: 10 }} />
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder={
-                    t.language === 'hi'
-                      ? 'अपना पासवर्ड दर्ज करें'
-                      : t.language === 'ta'
-                      ? 'உங்கள் கடவுச்சொல்லை உள்ளிடவும்'
-                      : t.language === 'es'
-                      ? 'Ingrese su contraseña'
-                      : 'Enter your password'
-                  }
-                  placeholderTextColor={colors.textSecondary + '70'}
-                  secureTextEntry={secureText}
-                  autoCapitalize="none"
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                  <Ionicons
-                    name={secureText ? 'eye-off-outline' : 'eye-outline'}
-                    size={18}
-                    color={colors.textSecondary}
+              {/* Email Field */}
+              <View style={styles.formField}>
+                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.email.toUpperCase()}</Text>
+                <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.card }]}>
+                  <Ionicons name="mail-outline" size={18} color={colors.textSecondary} style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={[styles.input, { color: colors.text }]}
+                    placeholder="e.g. user@spendly.com"
+                    placeholderTextColor={colors.textSecondary + '70'}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
                   />
+                </View>
+              </View>
+
+              {/* Password Field */}
+              <View style={styles.formField}>
+                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t.password.toUpperCase()}</Text>
+                <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.card }]}>
+                  <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={[styles.input, { color: colors.text }]}
+                    placeholder={
+                      t.language === 'hi'
+                        ? 'अपना पासवर्ड दर्ज करें'
+                        : t.language === 'ta'
+                        ? 'உங்கள் கடவுச்சொல்லை உள்ளிடவும்'
+                        : t.language === 'es'
+                        ? 'Ingrese su contraseña'
+                        : 'Enter your password'
+                    }
+                    placeholderTextColor={colors.textSecondary + '70'}
+                    secureTextEntry={secureText}
+                    autoCapitalize="none"
+                    value={password}
+                    onChangeText={setPassword}
+                  />
+                  <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                    <Ionicons
+                      name={secureText ? 'eye-off-outline' : 'eye-outline'}
+                      size={18}
+                      color={colors.textSecondary}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Login Action */}
+              <TouchableOpacity
+                style={[styles.loginBtn, { backgroundColor: colors.primary }, shadows]}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : (
+                  <Text style={styles.loginBtnText}>{t.signIn}</Text>
+                )}
+              </TouchableOpacity>
+
+              {/* Register Redirect */}
+              <View style={styles.signupPrompt}>
+                <Text style={[styles.promptText, { color: colors.textSecondary }]}>{t.noAccount} </Text>
+                <TouchableOpacity onPress={() => router.push('/register' as any)}>
+                  <Text style={[styles.linkText, { color: colors.primary, fontWeight: 'bold' }]}>{t.signUp}</Text>
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* Login Action */}
-            <TouchableOpacity
-              style={[styles.loginBtn, { backgroundColor: colors.primary }, shadows]}
-              onPress={handleLogin}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color="#ffffff" />
-              ) : (
-                <Text style={styles.loginBtnText}>{t.signIn}</Text>
-              )}
-            </TouchableOpacity>
-
-            {/* Register Redirect */}
-            <View style={styles.signupPrompt}>
-              <Text style={[styles.promptText, { color: colors.textSecondary }]}>{t.noAccount} </Text>
-              <TouchableOpacity onPress={() => router.push('/register' as any)}>
-                <Text style={[styles.linkText, { color: colors.primary, fontWeight: 'bold' }]}>{t.signUp}</Text>
-              </TouchableOpacity>
-            </View>
-
-
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </ConditionalWrapper>
     </SafeAreaView>
@@ -188,6 +189,11 @@ const styles = StyleSheet.create({
   },
   keyboardView: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: 24,
   },
   container: {
     flex: 1,
