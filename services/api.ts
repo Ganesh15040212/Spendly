@@ -6,10 +6,7 @@ import { setCachedCurrency, setCachedCustomCategories } from '../utils/helpers';
 // Define your production Render backend API URL here
 const PROD_API_URL = 'https://spendly-632z.onrender.com/api';
 
-// Point directly to production Render server by default (works everywhere).
-// To test a local server, uncomment the local IP block below.
-const API_URL = PROD_API_URL;
-/*
+// Automatically detect host IP based on emulator platform
 const API_URL = !__DEV__
   ? PROD_API_URL
   : Platform.select({
@@ -17,47 +14,17 @@ const API_URL = !__DEV__
       ios: 'http://192.168.21.250:5000/api',
       default: 'http://localhost:5000/api',
     }) || 'http://localhost:5000/api';
-*/
-
-const fetchWithTimeoutAndRetry = async (
-  url: string,
-  options: RequestInit,
-  retries = 3,
-  delayMs = 3000
-): Promise<Response> => {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
-
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      return response;
-    } catch (error: any) {
-      console.warn(`Connection attempt ${i + 1} failed:`, error.message || error);
-      if (i === retries - 1) {
-        throw error;
-      }
-      await new Promise(resolve => setTimeout(resolve, delayMs));
-    }
-  }
-  throw new Error('Connection failed after multiple attempts');
-};
 
 export const ApiService = {
   // 1. User Registration
   register: async (name: string, email: string, password: string, phone: string) => {
     let response: Response | null = null;
     try {
-      response = await fetchWithTimeoutAndRetry(`${API_URL}/auth/register`, {
+      response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, phone }),
-      }, 3, 3000);
+      });
     } catch (networkError: any) {
       console.warn('Server registration connection refused, entering local offline mode:', networkError.message);
       // Fallback: Create offline user profile locally in AsyncStorage
@@ -107,11 +74,11 @@ export const ApiService = {
   login: async (email: string, password: string) => {
     let response: Response | null = null;
     try {
-      response = await fetchWithTimeoutAndRetry(`${API_URL}/auth/login`, {
+      response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-      }, 3, 3000);
+      });
     } catch (networkError: any) {
       console.warn('Server login connection refused, checking cached profile:', networkError.message);
       // Fallback: Check if a local profile matches this email to authenticate offline
@@ -122,7 +89,7 @@ export const ApiService = {
       }
       return { 
         success: false as const, 
-        error: 'Could not connect to server. If the server was sleeping (Render Free Tier), it takes about 50 seconds to wake up. Please wait a moment and try signing in again.',
+        error: 'Could not connect to server. If you do not have a local account, please Sign Up to run offline.',
         user: undefined,
         offline: undefined
       };
@@ -172,7 +139,7 @@ export const ApiService = {
       const profilePicture = await StorageService.getProfilePicture();
       const customCategories = await StorageService.getCustomCategories();
 
-      const response = await fetchWithTimeoutAndRetry(`${API_URL}/sync`, {
+      const response = await fetch(`${API_URL}/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -188,7 +155,7 @@ export const ApiService = {
           customCategories,
           initialPull,
         }),
-      }, 2, 2000);
+      });
 
       if (!response.ok) {
         throw new Error(`Sync failed with status code ${response.status}`);
