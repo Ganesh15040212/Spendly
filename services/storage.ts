@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Transaction, Budget, Goal, Subscription, User } from '../database/schema';
-import { CategoryConfig } from '../utils/helpers';
+import { CategoryConfig, setCachedCustomCategories } from '../utils/helpers';
 
 const KEYS = {
   TRANSACTIONS: '@spendly_transactions',
@@ -40,8 +40,21 @@ export const StorageService = {
   },
 
   logout: async (): Promise<void> => {
-    await AsyncStorage.removeItem(KEYS.AUTH_TOKEN);
-    await AsyncStorage.removeItem(KEYS.USER_PROFILE);
+    try {
+      await AsyncStorage.removeItem(KEYS.AUTH_TOKEN);
+      await AsyncStorage.removeItem(KEYS.USER_PROFILE);
+      await AsyncStorage.removeItem(KEYS.TRANSACTIONS);
+      await AsyncStorage.removeItem(KEYS.OPENING_BALANCE);
+      await AsyncStorage.removeItem(KEYS.BUDGETS);
+      await AsyncStorage.removeItem(KEYS.GOALS);
+      await AsyncStorage.removeItem(KEYS.SUBSCRIPTIONS);
+      await AsyncStorage.removeItem(KEYS.CUSTOM_CATEGORIES);
+      
+      // Reset custom category memory caches
+      setCachedCustomCategories({}, {});
+    } catch (e) {
+      console.error('Failed to clear storage during logout', e);
+    }
   },
 
   // User Settings Preferences

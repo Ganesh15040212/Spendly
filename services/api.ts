@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import { StorageService } from './storage';
 import { Transaction, Budget, Goal, Subscription } from '../database/schema';
 import { setCachedCurrency, setCachedCustomCategories } from '../utils/helpers';
+import CryptoJS from 'crypto-js';
 
 // Define your production Render backend API URL here
 const PROD_API_URL = 'https://spendly-632z.onrender.com/api';
@@ -51,9 +52,6 @@ export const ApiService = {
       // Save session credentials
       await StorageService.setAuthToken(result.token);
       await StorageService.setUserProfile(result.user);
-      if (result.user.profilePicture) {
-        await StorageService.setProfilePicture(result.user.profilePicture);
-      }
       if (result.user.customCategories) {
         await StorageService.saveCustomCategories(result.user.customCategories);
         setCachedCustomCategories(result.user.customCategories.income, result.user.customCategories.expense);
@@ -119,111 +117,92 @@ export const ApiService = {
     }
   },
 
-  // 3. Sync all local data with backend server
+  // 3. Sync all local data with backend server (Client-Side Encrypted Backup & Restore)
   syncData: async (initialPull = false): Promise<{ success: boolean; message: string }> => {
     try {
       const token = await StorageService.getAuthToken();
       if (!token) return { success: false, message: 'User not logged in.' };
 
-      const transactions = await StorageService.getTransactions();
-      const budgets = await StorageService.getBudgets();
-      const goals = await StorageService.getGoals();
-      const subscriptions = await StorageService.getSubscriptions();
-      const openingBalance = await StorageService.getOpeningBalance();
-      const profilePicture = await StorageService.getProfilePicture();
-      const customCategories = await StorageService.getCustomCategories();
+      const profile = await StorageService.getUserProfile();
+      if (!profile || !profile.id) return { success: false, message: 'User profile not loaded.' };
+      
+      const userId = profile.id; // Unique encryption key per user
 
-      const response = await fetch(`${API_URL}/sync`, {
+      // Pull/Restore flow on fresh installations
+      if (initialPull) {
+        const response = await fetch(`${API_URL}/auth/backup`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Restore failed with status code ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result.success && result.backupData) {
+          try {
+            // Decrypt backup payload using user's unique ID
+            const bytes = CryptoJS.AES.decrypt(result.backupData, userId);
+            const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+            if (decryptedText) {
+              const data = JSON.parse(decryptedText);
+
+              // Restore user records locally
+              if (data.transactions) await StorageService.saveTransactionsList(data.transactions);
+              if (data.budgets) await StorageService.saveBudgetsList(data.budgets);
+              if (data.goals) await StorageService.saveGoalsList(data.goals);
+              if (data.subscriptions) await StorageService.saveSubscriptionsList(data.subscriptions);
+              if (typeof data.openingBalance === 'number') await StorageService.setOpeningBalance(data.openingBalance);
+              if (data.profilePicture) await StorageService.setProfilePicture(data.profilePicture);
+              if (data.customCategories) {
+                await StorageService.saveCustomCategories(data.customCategories);
+                setCachedCustomCategories(data.customCategories.income, data.customCategories.expense);
+              }
+            }
+          } catch (decryptErr) {
+            console.error('Failed to decrypt and restore backup payload:', decryptErr);
+          }
+        }
+        return { success: true, message: 'Data restored successfully.' };
+      }
+
+      // Compile current database records for client-side backup
+      const backupObj = {
+        transactions: await StorageService.getTransactions(),
+        budgets: await StorageService.getBudgets(),
+        goals: await StorageService.getGoals(),
+        subscriptions: await StorageService.getSubscriptions(),
+        openingBalance: await StorageService.getOpeningBalance(),
+        profilePicture: await StorageService.getProfilePicture(),
+        customCategories: await StorageService.getCustomCategories(),
+      };
+
+      // Encrypt the JSON payload on the client device
+      const encryptedString = CryptoJS.AES.encrypt(JSON.stringify(backupObj), userId).toString();
+
+      const response = await fetch(`${API_URL}/auth/backup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          transactions,
-          budgets,
-          goals,
-          subscriptions,
-          openingBalance,
-          profilePicture,
-          customCategories,
-          initialPull,
-        }),
+        body: JSON.stringify({ backupData: encryptedString }),
       });
 
       if (!response.ok) {
-        throw new Error(`Sync failed with status code ${response.status}`);
+        throw new Error(`Backup failed with status code ${response.status}`);
       }
 
-      const result = await response.json();
-      
-      if (result.success) {
-        // Map transaction records back to local storage
-        const syncedTransactions: Transaction[] = result.transactions.map((t: any) => ({
-          _id: t._id,
-          id: t.id || t._id,
-          amount: t.amount,
-          type: t.type,
-          category: t.category,
-          wallet: t.wallet || 'Cash',
-          note: t.note,
-          date: t.date,
-          createdAt: t.createdAt || new Date().toISOString(),
-        }));
-        await StorageService.saveTransactionsList(syncedTransactions);
-
-        // Map budget records
-        const syncedBudgets: Budget[] = result.budgets.map((b: any) => ({
-          _id: b._id,
-          category: b.category,
-          limitAmount: b.limitAmount,
-          period: b.period,
-        }));
-        await StorageService.saveBudgetsList(syncedBudgets);
-
-        // Map savings goals records
-        const syncedGoals: Goal[] = result.goals.map((g: any) => ({
-          _id: g._id,
-          id: g.id || g._id,
-          name: g.name,
-          targetAmount: g.targetAmount,
-          currentAmount: g.currentAmount,
-          deadline: g.deadline,
-        }));
-        await StorageService.saveGoalsList(syncedGoals);
-
-        // Map subscription records
-        const syncedSubs: Subscription[] = result.subscriptions.map((s: any) => ({
-          _id: s._id,
-          id: s.id || s._id,
-          name: s.name,
-          cost: s.cost,
-          period: s.period || 'monthly',
-          nextBillingDate: s.nextBillingDate,
-        }));
-        await StorageService.saveSubscriptionsList(syncedSubs);
-        
-        if (result.config && typeof result.config.openingBalance === 'number') {
-          await StorageService.setOpeningBalance(result.config.openingBalance);
-        }
-
-        if (result.profilePicture) {
-          await StorageService.setProfilePicture(result.profilePicture);
-        }
-        if (result.customCategories) {
-          await StorageService.saveCustomCategories(result.customCategories);
-          setCachedCustomCategories(result.customCategories.income, result.customCategories.expense);
-        }
-
-        return { success: true, message: 'Sync completed successfully!' };
-      }
-
-      return { success: false, message: 'Sync failed on server side.' };
+      return { success: true, message: 'Encrypted backup saved successfully.' };
     } catch (error: any) {
-      console.warn('API Sync Error:', error.message);
+      console.warn('Backup/Restore Error:', error.message);
       return { 
         success: false, 
-        message: 'Could not connect to server. Running in offline mode.' 
+        message: 'Could not connect to server. Running offline.' 
       };
     }
   },
@@ -253,33 +232,18 @@ export const ApiService = {
     }
   },
 
-  // Reset all user data in the database
+  // 5. Reset all user data locally (Deactivated cloud reset)
   resetData: async (): Promise<{ success: boolean; message: string }> => {
     try {
-      const token = await StorageService.getAuthToken();
-      if (!token) return { success: false, message: 'User not logged in.' };
-
-      const response = await fetch(`${API_URL}/auth/reset-data`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Reset failed with status code ${response.status}`);
-      }
-
-      const result = await response.json();
-      return { success: result.success, message: result.message || 'Reset completed' };
+      await StorageService.clearAll();
+      return { success: true, message: 'All local data reset successfully' };
     } catch (e: any) {
-      console.warn('API reset failed:', e.message);
+      console.warn('Local data reset failed:', e.message);
       return { success: false, message: e.message || 'Reset failed' };
     }
   },
 
-  // Health check to test server connection
+  // 6. Health check to test server connection
   testConnection: async (): Promise<boolean> => {
     try {
       const response = await fetch(`${API_URL.replace('/api', '')}/`, {

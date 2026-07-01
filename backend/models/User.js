@@ -41,6 +41,10 @@ const UserSchema = new mongoose.Schema(
       type: Object,
       default: { income: {}, expense: {} },
     },
+    backupData: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,
