@@ -10,6 +10,7 @@ import {
   Platform,
   StatusBar,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -24,6 +25,9 @@ import {
   getMergedCategories,
   getMergedWallets,
   getCachedCurrencySymbol,
+  setCachedCustomCategories,
+  INCOME_CATEGORIES,
+  EXPENSE_CATEGORIES,
 } from '../utils/helpers';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomDatePicker as DateTimePicker } from '../components/CustomDatePicker';
@@ -53,6 +57,7 @@ export const AddTransactionScreen: React.FC = () => {
   const cardWidth = (screenWidth - spacing.md * 2 - (3 * gridGap)) / 4;
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [error, setError] = useState('');
+  const [refreshCount, setRefreshCount] = useState(0);
 
   // Handle Edit Mode Load
   useEffect(() => {
@@ -107,6 +112,85 @@ export const AddTransactionScreen: React.FC = () => {
       setCategory(defaultCat);
     }
   }, [type, isEditMode]);
+
+  // Handle Long Press Category for deletion
+  const handleLongPressCategory = async (categoryName: string) => {
+    // Check if it's a custom category
+    const staticMap = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    const isCustom = !staticMap[categoryName];
+
+    if (!isCustom) {
+      // Do nothing for default system categories
+      return;
+    }
+
+    const executeDelete = async () => {
+      try {
+        // 1. Delete from local storage
+        await StorageService.deleteCustomCategory(type, categoryName);
+        
+        // 2. Clear category selection if deleted category was currently selected
+        if (category === categoryName) {
+          const defaultCat = Object.keys(staticMap)[0];
+          setCategory(defaultCat);
+        }
+        
+        // 3. Update cached categories in helpers
+        const customCats = await StorageService.getCustomCategories();
+        setCachedCustomCategories(customCats.income, customCats.expense);
+        
+        // 4. Force local state refresh
+        setRefreshCount(prev => prev + 1);
+        
+        // 5. Sync to server in background
+        ApiService.syncData();
+        
+        Alert.alert(
+          language === 'ta' ? 'வெற்றி' : language === 'hi' ? 'सफलता' : language === 'es' ? 'Éxito' : 'Success',
+          language === 'ta'
+            ? `வகை "${categoryName}" வெற்றிகரமாக நீக்கப்பட்டது.`
+            : language === 'hi'
+            ? `श्रेणी "${categoryName}" सफलतापूर्वक हटा दी गई है।`
+            : language === 'es'
+            ? `La categoría "${categoryName}" ha sido eliminada con éxito.`
+            : `Category "${categoryName}" has been successfully deleted.`
+        );
+      } catch (err) {
+        console.error('Failed to delete custom category', err);
+        Alert.alert('Error', 'Failed to delete category.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirmDelete = window.confirm(
+        language === 'ta'
+          ? `"${categoryName}" வகையை நீக்க விரும்புகிறீர்களா?`
+          : language === 'hi'
+          ? `क्या आप वाकई "${categoryName}" श्रेणी को हटाना चाहते हैं?`
+          : language === 'es'
+          ? `¿Está seguro de que desea eliminar la categoría "${categoryName}"?`
+          : `Are you sure you want to delete the category "${categoryName}"?`
+      );
+      if (confirmDelete) {
+        executeDelete();
+      }
+    } else {
+      Alert.alert(
+        language === 'ta' ? 'வகையை நீக்கு' : language === 'hi' ? 'श्रेणी हटाएं' : language === 'es' ? 'Eliminar Categoría' : 'Delete Category',
+        language === 'ta'
+          ? `"${categoryName}" என்ற தனிப்பயன் வகையை நிச்சயமாக நீக்க விரும்புகிறீர்களா?`
+          : language === 'hi'
+          ? `क्या आप वाकई कस्टम श्रेणी "${categoryName}" को हटाना चाहते हैं?`
+          : language === 'es'
+          ? `¿Está seguro de que desea eliminar la categoría personalizada "${categoryName}"?`
+          : `Are you sure you want to delete the custom category "${categoryName}"?`,
+        [
+          { text: language === 'ta' ? 'ரத்துசெய்' : language === 'hi' ? 'रद्द करें' : language === 'es' ? 'Cancelar' : 'Cancel', style: 'cancel' },
+          { text: language === 'ta' ? 'நீக்கு' : language === 'hi' ? 'हटाएं' : language === 'es' ? 'Eliminar' : 'Delete', style: 'destructive', onPress: executeDelete }
+        ]
+      );
+    }
+  };
 
   // Handle Save Action
   const handleSave = async () => {
@@ -385,6 +469,8 @@ export const AddTransactionScreen: React.FC = () => {
                 return (
                   <TouchableOpacity
                     key={cat.name}
+                    onLongPress={() => handleLongPressCategory(cat.name)}
+                    delayLongPress={500}
                     style={[
                       styles.categoryCard,
                       {

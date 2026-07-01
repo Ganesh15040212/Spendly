@@ -267,6 +267,18 @@ export const StorageService = {
     }
   },
 
+  deleteCustomCategory: async (type: 'income' | 'expense', categoryName: string): Promise<void> => {
+    try {
+      const data = await StorageService.getCustomCategories();
+      if (data[type] && data[type][categoryName]) {
+        delete data[type][categoryName];
+        await AsyncStorage.setItem(KEYS.CUSTOM_CATEGORIES, JSON.stringify(data));
+      }
+    } catch (e) {
+      console.error('Failed to delete custom category', e);
+    }
+  },
+
   saveCustomCategories: async (cats: { income: Record<string, CategoryConfig>; expense: Record<string, CategoryConfig> }): Promise<void> => {
     try {
       await AsyncStorage.setItem(KEYS.CUSTOM_CATEGORIES, JSON.stringify(cats));
