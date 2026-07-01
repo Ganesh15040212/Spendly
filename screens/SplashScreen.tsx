@@ -6,6 +6,7 @@ import { NotificationService } from '../services/notification';
 import { ApiService } from '../services/api';
 import { StorageService } from '../services/storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { setCachedCustomCategories } from '../utils/helpers';
 
 export const SplashScreen: React.FC = () => {
   const { colors, spacing } = useTheme();
@@ -40,6 +41,10 @@ export const SplashScreen: React.FC = () => {
       try {
         // Request and schedule notifications (at 8:00 PM)
         await NotificationService.scheduleDailyReminder(20, 0);
+
+        // Load custom categories into memory cache
+        const customCats = await StorageService.getCustomCategories();
+        setCachedCustomCategories(customCats.income, customCats.expense);
 
         // 2. Perform a fast API Sync in background (fails silently if offline)
         await ApiService.syncData();

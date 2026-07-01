@@ -17,7 +17,7 @@ import { useTheme } from '../utils/theme';
 import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
 import { Transaction, User, WalletType } from '../database/schema';
-import { getTodayString, formatDateString, formatCurrency } from '../utils/helpers';
+import { getTodayString, formatDateString, formatCurrency, setCachedCustomCategories } from '../utils/helpers';
 import { BalanceCard } from '../components/BalanceCard';
 import { TransactionItem } from '../components/TransactionItem';
 import { EmptyState } from '../components/EmptyState';
@@ -86,6 +86,10 @@ export const DashboardScreen: React.FC = () => {
       const balance = await StorageService.getOpeningBalance();
       const allTx = await StorageService.getTransactions();
       const budgets = await StorageService.getBudgets();
+      
+      // Load custom categories into memory cache
+      const customCats = await StorageService.getCustomCategories();
+      setCachedCustomCategories(customCats.income, customCats.expense);
       
       setOpeningBalance(balance);
       setTransactions(allTx);
