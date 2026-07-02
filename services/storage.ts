@@ -264,7 +264,11 @@ export const StorageService = {
   getCustomCategories: async (): Promise<{ income: Record<string, CategoryConfig>; expense: Record<string, CategoryConfig> }> => {
     try {
       const data = await AsyncStorage.getItem(KEYS.CUSTOM_CATEGORIES);
-      return data ? JSON.parse(data) : { income: {}, expense: {} };
+      const parsed = data ? JSON.parse(data) : null;
+      return {
+        income: (parsed && parsed.income) ? parsed.income : {},
+        expense: (parsed && parsed.expense) ? parsed.expense : {},
+      };
     } catch (e) {
       return { income: {}, expense: {} };
     }
@@ -273,10 +277,14 @@ export const StorageService = {
   addCustomCategory: async (type: 'income' | 'expense', category: CategoryConfig): Promise<void> => {
     try {
       const data = await StorageService.getCustomCategories();
+      if (!data[type]) {
+        data[type] = {};
+      }
       data[type][category.name] = category;
       await AsyncStorage.setItem(KEYS.CUSTOM_CATEGORIES, JSON.stringify(data));
     } catch (e) {
       console.error('Failed to add custom category', e);
+      throw e;
     }
   },
 

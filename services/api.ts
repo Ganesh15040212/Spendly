@@ -2,6 +2,23 @@ import { Platform } from 'react-native';
 import { StorageService } from './storage';
 import { Transaction, Budget, Goal, Subscription } from '../database/schema';
 import { setCachedCurrency, setCachedCustomCategories } from '../utils/helpers';
+
+// Polyfill global.crypto.getRandomValues for crypto-js in React Native (Hermes)
+if (typeof global.crypto !== 'object') {
+  global.crypto = {} as any;
+}
+if (typeof global.crypto.getRandomValues !== 'function') {
+  global.crypto.getRandomValues = <T extends ArrayBufferView | null>(array: T): T => {
+    if (array) {
+      const view = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
+      for (let i = 0; i < view.length; i++) {
+        view[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    return array;
+  };
+}
+
 import CryptoJS from 'crypto-js';
 
 // Define your production Render backend API URL here
@@ -139,6 +156,10 @@ export const ApiService = {
         });
 
         if (!response.ok) {
+          if (response.status === 404) {
+            console.log('No cloud backup found on server (404). Starting with clean local storage.');
+            return { success: true, message: 'No server backup found. Running locally.' };
+          }
           throw new Error(`Restore failed with status code ${response.status}`);
         }
 

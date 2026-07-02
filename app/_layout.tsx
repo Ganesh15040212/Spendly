@@ -1,3 +1,19 @@
+// Polyfill global.crypto.getRandomValues for crypto-js in React Native (Hermes)
+if (typeof global.crypto !== 'object') {
+  global.crypto = {} as any;
+}
+if (typeof global.crypto.getRandomValues !== 'function') {
+  global.crypto.getRandomValues = <T extends ArrayBufferView | null>(array: T): T => {
+    if (array) {
+      const view = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
+      for (let i = 0; i < view.length; i++) {
+        view[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    return array;
+  };
+}
+
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useTheme, ThemeProvider } from '../utils/theme';
