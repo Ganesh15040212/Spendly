@@ -95,6 +95,7 @@ export const ProfileScreen: React.FC = () => {
   const [catColor, setCatColor] = useState('#6366f1'); // Default Indigo
   const [catIcon, setCatIcon] = useState('options-outline'); // Default custom icon
   const [customCatsList, setCustomCatsList] = useState<{ income: Record<string, CategoryConfig>; expense: Record<string, CategoryConfig> }>({ income: {}, expense: {} });
+  const [editingCat, setEditingCat] = useState<{ name: string; type: 'income' | 'expense' } | null>(null);
 
   // Delayed theme/currency settings save
   const [tempThemeMode, setTempThemeMode] = useState<ThemeMode>('light');
@@ -133,6 +134,14 @@ export const ProfileScreen: React.FC = () => {
     };
     loadSettings();
   }, [profilePicture, username, themeMode, currency]);
+
+  const handleEditCategory = (type: 'income' | 'expense', cat: CategoryConfig) => {
+    setEditingCat({ name: cat.name, type });
+    setCatName(cat.name);
+    setCatType(type);
+    setCatColor(cat.color);
+    setCatIcon(cat.icon);
+  };
 
   const handleDeleteCustomCategory = async (type: 'income' | 'expense', categoryName: string) => {
     const executeDelete = async () => {
@@ -259,6 +268,53 @@ export const ProfileScreen: React.FC = () => {
       return;
     }
 
+    if (editingCat) {
+      try {
+        // If the name changed, check uniqueness
+        if (trimmedName.toLowerCase() !== editingCat.name.toLowerCase()) {
+          const mergedCats = getMergedCategories(catType);
+          const exists = Object.keys(mergedCats).some(
+            key => key.toLowerCase() === trimmedName.toLowerCase()
+          );
+          if (exists) {
+            Alert.alert('Error', `A category named "${trimmedName}" already exists for ${catType}s.`);
+            return;
+          }
+        }
+
+        // Delete the old key from storage
+        await StorageService.deleteCustomCategory(editingCat.type, editingCat.name);
+
+        // Add the updated key to storage
+        const updatedCategory = {
+          name: trimmedName,
+          icon: catIcon,
+          color: catColor,
+        };
+        await StorageService.addCustomCategory(catType, updatedCategory);
+
+        // Update in-memory cache immediately
+        const customCats = await StorageService.getCustomCategories();
+        setCachedCustomCategories(customCats.income, customCats.expense);
+        setCustomCatsList(customCats);
+
+        // Trigger cloud backup sync in the background
+        ApiService.syncData();
+
+        Alert.alert('Success', `Category "${trimmedName}" has been successfully updated.`);
+        
+        // Reset form and editing state
+        setCatName('');
+        setCatIcon('options-outline');
+        setCatColor('#6366f1');
+        setEditingCat(null);
+      } catch (e) {
+        console.error('Failed to update category', e);
+        Alert.alert('Error', 'An error occurred while updating the custom category.');
+      }
+      return;
+    }
+
     // Check if category name is unique
     const mergedCats = getMergedCategories(catType);
     const exists = Object.keys(mergedCats).some(
@@ -283,6 +339,9 @@ export const ProfileScreen: React.FC = () => {
       const customCats = await StorageService.getCustomCategories();
       setCachedCustomCategories(customCats.income, customCats.expense);
       setCustomCatsList(customCats);
+
+      // Trigger cloud backup sync in the background
+      ApiService.syncData();
 
       Alert.alert('Success', `Category "${trimmedName}" has been successfully added to your ${catType} list.`);
       
@@ -586,15 +645,35 @@ export const ProfileScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Add Category Button */}
-          <TouchableOpacity
-            style={[styles.saveBtn, { backgroundColor: colors.primary, marginTop: 0, marginBottom: 12 }, shadows]}
-            onPress={handleSaveCategory}
-          >
-            <Text style={styles.saveBtnText}>
-              {language === 'ta' ? 'வகையைச் சேமி' : language === 'hi' ? 'श्रेणी सहेजें' : language === 'es' ? 'Guardar Categoría' : 'Save Category'}
-            </Text>
-          </TouchableOpacity>
+          {/* Add/Edit Category Button */}
+          <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+            <TouchableOpacity
+              style={[styles.saveBtn, { flex: 1, backgroundColor: editingCat ? colors.income : colors.primary, marginTop: 0, marginBottom: 0 }, shadows]}
+              onPress={handleSaveCategory}
+            >
+              <Text style={styles.saveBtnText}>
+                {editingCat 
+                  ? (language === 'ta' ? 'வகையைப் புதுப்பி' : language === 'hi' ? 'श्रेणी अपडेट करें' : language === 'es' ? 'Actualizar Categoría' : 'Update Category')
+                  : (language === 'ta' ? 'வகையைச் சேமி' : language === 'hi' ? 'श्रेणी सहेजें' : language === 'es' ? 'Guardar Categoría' : 'Save Category')}
+              </Text>
+            </TouchableOpacity>
+
+            {editingCat && (
+              <TouchableOpacity
+                style={[styles.saveBtn, { flex: 0.8, backgroundColor: colors.border, marginTop: 0, marginBottom: 0 }, shadows]}
+                onPress={() => {
+                  setEditingCat(null);
+                  setCatName('');
+                  setCatIcon('options-outline');
+                  setCatColor('#6366f1');
+                }}
+              >
+                <Text style={[styles.saveBtnText, { color: colors.text }]}>
+                  {language === 'ta' ? 'ரத்துசெய்' : language === 'hi' ? 'रद्द करें' : language === 'es' ? 'Cancelar' : 'Cancel'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
           {/* Custom Categories List */}
           {(() => {
@@ -606,7 +685,7 @@ export const ProfileScreen: React.FC = () => {
             return (
               <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 16 }}>
                 <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginBottom: 12, fontWeight: 'bold' }]}>
-                  {language === 'ta' ? 'உங்களின் தனிப்பயன் வகைகள்' : language === 'hi' ? 'आपकी कस्टम श्रेणियां' : language === 'es' ? 'Sus Categorías Personalizadas' : 'Your Custom Categories'}
+                  {language === 'ta' ? 'உங்களின் தனிப்பயன் வகைகள்' : language === 'hi' ? 'आपकी कस्टम श्रेணிகள்' : language === 'es' ? 'Sus Categorías Personalizadas' : 'Your Custom Categories'}
                 </Text>
                 
                 {/* Expense Custom Categories List */}
@@ -623,9 +702,14 @@ export const ProfileScreen: React.FC = () => {
                           </View>
                           <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500' }}>{cat.name}</Text>
                         </View>
-                        <TouchableOpacity onPress={() => handleDeleteCustomCategory('expense', cat.name)} style={{ padding: 4 }}>
-                          <Ionicons name="trash-outline" size={18} color={colors.expense} />
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <TouchableOpacity onPress={() => handleEditCategory('expense', cat)} style={{ padding: 4 }}>
+                            <Ionicons name="create-outline" size={18} color={colors.primary} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => handleDeleteCustomCategory('expense', cat.name)} style={{ padding: 4 }}>
+                            <Ionicons name="trash-outline" size={18} color={colors.expense} />
+                          </TouchableOpacity>
+                        </View>
                       </View>
                     ))}
                   </View>
@@ -645,9 +729,14 @@ export const ProfileScreen: React.FC = () => {
                           </View>
                           <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500' }}>{cat.name}</Text>
                         </View>
-                        <TouchableOpacity onPress={() => handleDeleteCustomCategory('income', cat.name)} style={{ padding: 4 }}>
-                          <Ionicons name="trash-outline" size={18} color={colors.expense} />
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <TouchableOpacity onPress={() => handleEditCategory('income', cat)} style={{ padding: 4 }}>
+                            <Ionicons name="create-outline" size={18} color={colors.primary} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => handleDeleteCustomCategory('income', cat.name)} style={{ padding: 4 }}>
+                            <Ionicons name="trash-outline" size={18} color={colors.expense} />
+                          </TouchableOpacity>
+                        </View>
                       </View>
                     ))}
                   </View>

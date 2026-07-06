@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   filterScroll: {
-    maxHeight: 46,
+    flexGrow: 0,
     marginBottom: 8,
   },
   filterTab: {
