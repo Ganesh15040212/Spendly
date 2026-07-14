@@ -302,7 +302,7 @@ export const HistoryScreen: React.FC = () => {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.filterScroll}
-        contentContainerStyle={{ paddingHorizontal: spacing.md, gap: 8 }}
+        contentContainerStyle={{ paddingHorizontal: spacing.md, gap: 8, alignItems: 'center' }}
       >
         {(['all', 'today', 'weekly', 'monthly', 'yearly', 'custom'] as FilterType[]).map(filter => {
           const isActive = activeFilter === filter;
@@ -663,13 +663,13 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   filterScroll: {
-    flexGrow: 0,
+    height: 40,
     marginBottom: 8,
   },
   filterTab: {
     borderWidth: 1,
     borderRadius: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 16,
     justifyContent: 'center',
   },
