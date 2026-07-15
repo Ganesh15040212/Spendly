@@ -22,7 +22,6 @@ import {
   getTodayString,
   formatDateString,
   formatCurrency,
-  getStartAndEndDates,
 } from '../utils/helpers';
 import { TransactionItem } from '../components/TransactionItem';
 import { EmptyState } from '../components/EmptyState';
@@ -30,7 +29,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomDatePicker as DateTimePicker } from '../components/CustomDatePicker';
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
-type FilterType = 'today' | 'weekly' | 'monthly' | 'yearly' | 'custom' | 'all';
+type FilterType = 'custom' | 'all';
 
 export const HistoryScreen: React.FC = () => {
   const { colors, spacing, sizes, shadows, t, language } = useTheme();
@@ -43,10 +42,14 @@ export const HistoryScreen: React.FC = () => {
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [activeFilter, setActiveFilter] = useState<FilterType>('custom');
   
-  // Custom Dates (For Custom Filter)
-  const [customStartDate, setCustomStartDate] = useState(getTodayString());
+  // Date Range Pickers (always visible)
+  const [customStartDate, setCustomStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(1); // first of current month
+    return d.toISOString().split('T')[0];
+  });
   const [customEndDate, setCustomEndDate] = useState(getTodayString());
   const [datePickerMode, setDatePickerMode] = useState<'start' | 'end' | null>(null);
 
@@ -83,15 +86,8 @@ export const HistoryScreen: React.FC = () => {
   useEffect(() => {
     let result = [...allTransactions];
 
-    // 1. Apply Date Filter
-    if (activeFilter !== 'all' && activeFilter !== 'custom') {
-      const { startDate, endDate } = getStartAndEndDates(activeFilter);
-      if (startDate && endDate) {
-        result = result.filter(t => t.date >= startDate && t.date <= endDate);
-      }
-    } else if (activeFilter === 'custom') {
-      result = result.filter(t => t.date >= customStartDate && t.date <= customEndDate);
-    }
+    // 1. Always apply Date Range Filter
+    result = result.filter(t => t.date >= customStartDate && t.date <= customEndDate);
 
     // 2. Apply Search Query
     if (searchQuery.trim() !== '') {
@@ -156,16 +152,8 @@ export const HistoryScreen: React.FC = () => {
   };
 
   // Export handlers
-  const getFilterLabel = (filter: FilterType): string => {
-    if (filter === 'all') return t.filterAll;
-    if (filter === 'today') return t.filterToday;
-    if (filter === 'weekly') return t.filterWeekly;
-    if (filter === 'monthly') return t.filterMonthly;
-    if (filter === 'yearly') return t.filterYearly;
-    if (filter === 'custom') {
-      return `${formatDateString(customStartDate)} - ${formatDateString(customEndDate)}`;
-    }
-    return '';
+  const getFilterLabel = (_filter: FilterType): string => {
+    return `${formatDateString(customStartDate)} - ${formatDateString(customEndDate)}`;
   };
 
   const handleExportPDF = () => {
@@ -297,79 +285,47 @@ export const HistoryScreen: React.FC = () => {
         )}
       </View>
 
-      {/* Filters Bar */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterScroll}
-        contentContainerStyle={{ paddingHorizontal: spacing.md, gap: 8, alignItems: 'center' }}
-      >
-        {(['all', 'today', 'weekly', 'monthly', 'yearly', 'custom'] as FilterType[]).map(filter => {
-          const isActive = activeFilter === filter;
-          return (
-            <TouchableOpacity
-              key={filter}
-              style={[
-                styles.filterTab,
-                { backgroundColor: colors.card, borderColor: colors.border },
-                isActive && { backgroundColor: colors.primary, borderColor: colors.primary },
-              ]}
-              onPress={() => setActiveFilter(filter)}
-            >
-              <Text
-                style={[
-                  styles.filterTabText,
-                  { color: colors.textSecondary, fontWeight: '600' },
-                  isActive && { color: '#ffffff' },
-                ]}
-              >
-                {filter === 'all'
-                  ? t.filterAll
-                  : filter === 'today'
-                  ? t.filterToday
-                  : filter === 'weekly'
-                  ? t.filterWeekly
-                  : filter === 'monthly'
-                  ? t.filterMonthly
-                  : filter === 'yearly'
-                  ? t.filterYearly
-                  : t.filterCustom}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-
-      {/* Custom Date Pickers */}
-      {activeFilter === 'custom' && (
-        <View style={[styles.customDateContainer, { paddingHorizontal: spacing.md }]}>
-          <TouchableOpacity
-            style={[styles.customDateBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-            onPress={() => setDatePickerMode('start')}
-          >
-            <Text style={[styles.customDateBtnLabel, { color: colors.textSecondary }]}>
-              {t.startDate}
+      {/* Date Range Row — always visible under search bar */}
+      <View style={[styles.dateRangeRow, { paddingHorizontal: spacing.md }]}>
+        {/* FROM picker */}
+        <TouchableOpacity
+          style={[styles.dateRangeBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => setDatePickerMode('start')}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="calendar-outline" size={14} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.dateRangeLabel, { color: colors.textSecondary }]}>
+              {language === 'ta' ? 'தொடக்கம்' : language === 'hi' ? 'से' : language === 'es' ? 'Desde' : 'From'}
             </Text>
-            <Text style={[styles.customDateBtnValue, { color: colors.text }]}>
+            <Text style={[styles.dateRangeValue, { color: colors.text }]}>
               {formatDateString(customStartDate)}
             </Text>
-          </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
 
-          <View style={[styles.customDateConnector, { backgroundColor: colors.border }]} />
+        {/* Arrow separator */}
+        <View style={styles.dateRangeArrow}>
+          <Ionicons name="arrow-forward" size={16} color={colors.textSecondary} />
+        </View>
 
-          <TouchableOpacity
-            style={[styles.customDateBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-            onPress={() => setDatePickerMode('end')}
-          >
-            <Text style={[styles.customDateBtnLabel, { color: colors.textSecondary }]}>
-              {t.endDate}
+        {/* TO picker */}
+        <TouchableOpacity
+          style={[styles.dateRangeBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => setDatePickerMode('end')}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="calendar-outline" size={14} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.dateRangeLabel, { color: colors.textSecondary }]}>
+              {language === 'ta' ? 'முடிவு' : language === 'hi' ? 'तक' : language === 'es' ? 'Hasta' : 'To'}
             </Text>
-            <Text style={[styles.customDateBtnValue, { color: colors.text }]}>
+            <Text style={[styles.dateRangeValue, { color: colors.text }]}>
               {formatDateString(customEndDate)}
             </Text>
-          </TouchableOpacity>
-        </View>
-      )}
+          </View>
+        </TouchableOpacity>
+      </View>
 
       {/* Financial Summary */}
       <View style={[styles.rangeSummary, { backgroundColor: colors.primaryLight + '40', marginHorizontal: spacing.md }]}>
@@ -662,19 +618,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     height: '100%',
   },
-  filterScroll: {
-    height: 40,
-    marginBottom: 8,
+  dateRangeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 8,
   },
-  filterTab: {
+  dateRangeBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    justifyContent: 'center',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
   },
-  filterTabText: {
-    fontSize: 12,
+  dateRangeLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 1,
+  },
+  dateRangeValue: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  dateRangeArrow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 28,
   },
   customDateContainer: {
     flexDirection: 'row',
